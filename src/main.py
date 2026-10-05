@@ -74,15 +74,9 @@ class ConversationMessage(BaseModel):
     persona: Optional[str] = "tenant"
 
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 def root():
-
-    return {
-        "status": "online",
-        "service": "Real Estate AI",
-        "version": "2.0.0",
-        "database": "connected" if db.ENABLED else "not configured"
-    }
+    return RedirectResponse(url="/login")
 
 
 @app.get("/ui", include_in_schema=False)
