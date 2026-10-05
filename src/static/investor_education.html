@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script src="/assets/tab-session.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Real estate investing basics · Staybot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #1B3A5C; --brand-dark: #12283F; --brand-soft: #EAF0F6; --accent: #B8873C;
+    --ink: #15191E; --ink-2: #5A6069;
+    --line: #E2E4E8; --line-soft: #EDEFF1;
+    --bg: #FFFFFF; --bg-soft: #F6F7F9;
+    --pos: #1F7A4D;
+    --font-display: "Fraunces", Georgia, serif;
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: var(--font-sans);
+    color: var(--ink); background: var(--bg-soft); min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; padding: 40px 16px 48px;
+  }
+  .logo { display: flex; align-items: center; gap: 8px; color: var(--brand); font-weight: 700; font-size: 22px; text-decoration: none; margin-bottom: 20px; }
+  .logo svg { width: 28px; height: 28px; }
+  .wrap { width: 100%; max-width: 680px; }
+  .eyebrow {
+    display: block; margin: 0 auto 14px; width: fit-content;
+    background: var(--brand-soft); color: var(--brand-dark);
+    font-weight: 600; font-size: 13px; padding: 5px 14px; border-radius: 999px;
+  }
+  h1 { font-family: var(--font-display); font-weight: 600; font-size: 27px; margin: 0 0 6px; text-align: center; }
+  p.sub { color: var(--ink-2); margin: 0 0 24px; font-size: 15px; text-align: center; }
+
+  /* Six segments: each one fills over the card's 10 seconds. */
+  .progress { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 14px; }
+  .seg { height: 5px; border-radius: 3px; background: var(--line); overflow: hidden; padding: 0; border: 0; cursor: default; }
+  .seg[data-seen="true"] { cursor: pointer; }
+  .seg i { display: block; height: 100%; width: 0; background: var(--brand); }
+
+  .deck { position: relative; }
+  .slide {
+    background: #fff; border: 1px solid var(--line); border-radius: 16px;
+    padding: 30px 32px 28px; box-shadow: 0 2px 16px rgba(15,23,33,.05);
+    min-height: 360px; display: flex; flex-direction: column;
+  }
+  .slide[hidden] { display: none; }
+  .slide .count { color: var(--ink-2); font-size: 13px; font-weight: 600; margin: 0 0 10px; }
+  .slide h2 { font-family: var(--font-display); font-weight: 600; font-size: 24px; line-height: 1.2; margin: 0 0 10px; }
+  .slide p { color: var(--ink-2); font-size: 15px; line-height: 1.6; margin: 0 0 10px; max-width: 60ch; }
+  .slide p b { color: var(--ink); font-weight: 600; }
+
+  /* The worked example: the same $250,000 home on every card. */
+  .example { margin-top: auto; padding-top: 18px; }
+  .example .label { font-size: 12.5px; color: var(--ink-2); margin-bottom: 8px; }
+  .sum { border: 1px solid var(--line-soft); background: var(--bg-soft); border-radius: 10px; padding: 12px 16px;
+    display: grid; grid-template-columns: 1fr auto; row-gap: 6px; font-size: 14.5px; font-variant-numeric: tabular-nums; }
+  .sum span:nth-child(even) { text-align: right; font-weight: 600; padding-left: 16px; white-space: nowrap; }
+  .sum .total { border-top: 1px solid var(--line); padding-top: 8px; font-weight: 700; color: var(--ink); }
+  .sum .total.pos { color: var(--pos); }
+
+  .journey-list { list-style: none; margin: 4px 0 0; padding: 0; columns: 2; column-gap: 24px; }
+  .journey-list li { display: flex; align-items: baseline; gap: 10px; font-size: 14px; color: var(--ink-2); padding: 4px 0; break-inside: avoid; }
+  .journey-list .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--line); flex: none; }
+  .journey-list li.now { color: var(--ink); font-weight: 600; }
+  .journey-list li.now .dot { background: var(--brand); }
+
+  .controls { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+  .controls .grow { flex: 1; }
+  button.ghost { border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: 10px; padding: 10px 16px;
+    font: 600 14px var(--font-sans); cursor: pointer; }
+  button.ghost:hover:not(:disabled) { border-color: var(--ink-2); }
+  button.ghost:disabled { opacity: .45; cursor: default; }
+  .timer { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+  .actions { margin-top: 18px; }
+  button.primary {
+    width: 100%; padding: 14px; border: none; border-radius: 12px; background: var(--brand);
+    color: #fff; font-weight: 700; font-size: 15.5px; cursor: pointer; font-family: var(--font-sans);
+  }
+  button.primary:hover:not(:disabled) { background: var(--brand-dark); }
+  button.primary:disabled { background: #9FB0C2; cursor: default; }
+  button:focus-visible, .seg:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .status { min-height: 20px; margin-top: 12px; font-size: 13.5px; text-align: center; }
+  .status.bad { color: #C0392B; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  #gate { text-align: center; color: var(--ink-2); padding: 60px 0; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .slide.enter { animation: enter .35s ease-out; }
+    @keyframes enter { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
+  }
+  @media (max-width: 560px) {
+    body { padding-top: 64px; }
+    .slide { padding: 24px 20px; min-height: 420px; }
+    .slide h2 { font-size: 21px; }
+    .journey-list { columns: 1; }
+  }
+</style>
+</head>
+<body>
+<!-- Log out - every user (shared helper in /assets/tab-session.js). -->
+<style>
+  .sb-logout { position: fixed; top: 18px; right: 20px; z-index: 50; display: inline-flex; align-items: center; gap: 7px;
+    border: 1px solid #DDDDDD; background: #fff; color: #222; border-radius: 999px; padding: 8px 14px 8px 12px;
+    font: 600 13.5px/1 inherit; font-family: inherit; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+  .sb-logout:hover { border-color: #222; }
+  .sb-logout:focus-visible { outline: 2px solid #1B3A5C; outline-offset: 2px; }
+  .sb-logout:disabled { opacity: .6; cursor: default; }
+  @media (max-width: 560px) { .sb-logout { top: 12px; right: 12px; padding: 7px 11px; } }
+</style>
+<button class="sb-logout" id="sb-logout" type="button">
+  <svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><path d="M8 4H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3M13 14l4-4-4-4M17 10H8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  Log out
+</button>
+<script>
+  document.getElementById("sb-logout").addEventListener("click", async function () {
+    this.disabled = true;
+    let me = null;
+    try { const r = await fetch("/auth/me"); if (r.ok) me = await r.json(); } catch (e) { /* ignore */ }
+    if (me) {
+      if (window.staybotLogout) await window.staybotLogout(false);
+      else { try { await fetch("/auth/logout", { method: "POST" }); } catch (e) { /* leave anyway */ } }
+      if (me.role === "admin") location.href = "/admin/login";
+      else location.href = "/login";
+      return;
+    }
+    // Shared team password: replace the browser's saved password so it asks again.
+    try { await fetch(location.pathname, { headers: { Authorization: "Basic " + btoa("logged-out:" + Date.now()) }, cache: "no-store" }); } catch (e) { /* ignore */ }
+    location.href = "/login";
+  });
+</script>
+
+
+<a class="logo" href="/portal">
+  <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+    <path d="M16 2.5c.9 0 1.7.5 2.2 1.3l11 19.1c1.6 2.8-.4 6.3-3.6 6.3-1.4 0-2.7-.7-3.5-1.8L16 20.2l-6.1 7.2c-.8 1.1-2.1 1.8-3.5 1.8-3.2 0-5.2-3.5-3.6-6.3l11-19.1c.5-.8 1.3-1.3 2.2-1.3zm0 4.4L6.1 24.2c-.4.7.1 1.6.9 1.6.4 0 .7-.2.9-.4L16 15.8l8.1 9.6c.2.3.5.4.9.4.8 0 1.3-.9.9-1.6L16 6.9z"/>
+  </svg>
+  staybot
+</a>
+
+<div id="gate" hidden>Loading…</div>
+
+<div class="wrap" id="app" hidden>
+  <div class="eyebrow">New Property Investor</div>
+  <h1>Real estate investing basics</h1>
+  <p class="sub" id="hello">Six short cards, one minute, then straight to your dashboard.</p>
+
+  <div class="progress" id="progress" role="tablist" aria-label="Cards"></div>
+
+  <div class="deck" id="deck" aria-live="polite">
+    <section class="slide" data-title="How it works">
+      <p class="count">Card 1 of 6</p>
+      <h2>You buy, you borrow, tenants pay rent</h2>
+      <p>You put part of the price down in cash and borrow the rest with a mortgage. Tenants' rent covers the running costs, the loan shrinks every month, and the home may rise in value.</p>
+      <p>It isn't risk-free: empty months, repairs, rate changes and market dips all happen. The stages ahead are there to catch them early.</p>
+      <div class="example"><div class="label">Our example home, used on every card</div>
+        <div class="sum"><span>Price</span><span>$250,000</span><span>Your down payment (20%)</span><span>$50,000</span>
+          <span class="total">Mortgage</span><span class="total">$200,000</span></div></div>
+    </section>
+
+    <section class="slide" data-title="Cash flow" hidden>
+      <p class="count">Card 2 of 6</p>
+      <h2>Cash flow: what's left each month</h2>
+      <p>Rent in, minus everything the home costs you: the mortgage payment, property taxes, insurance and upkeep. <b>Positive</b> means the home pays for itself. <b>Negative</b> means you top it up from your own pocket.</p>
+      <div class="example"><div class="label">The example home, per month</div>
+        <div class="sum"><span>Rent</span><span>$2,300</span><span>Mortgage payment (7%, 30 years)</span><span>−$1,330</span>
+          <span>Taxes, insurance, upkeep</span><span>−$600</span><span class="total pos">Cash flow</span><span class="total pos">+$370</span></div></div>
+    </section>
+
+    <section class="slide" data-title="Cap rate and ROI" hidden>
+      <p class="count">Card 3 of 6</p>
+      <h2>Cap rate and ROI: two ways to judge a deal</h2>
+      <p><b>Cap rate</b> is the home's yearly income before the mortgage, divided by its price. It compares homes fairly, however they're paid for.</p>
+      <p><b>ROI</b> (return on investment) is your yearly profit divided by the cash you actually put in, so it includes the effect of the loan.</p>
+      <div class="example"><div class="label">The example home, per year</div>
+        <div class="sum"><span>Cap rate: $20,400 income ÷ $250,000 price</span><span>8.2%</span>
+          <span>ROI: $4,440 profit ÷ $57,500 cash in</span><span>7.7%</span></div></div>
+    </section>
+
+    <section class="slide" data-title="Equity" hidden>
+      <p class="count">Card 4 of 6</p>
+      <h2>Equity: the part of the home you own</h2>
+      <p>Equity is the home's value minus what you still owe. It grows two ways: every mortgage payment shrinks the loan, and the value may rise over time (<b>appreciation</b>). Appreciation is never guaranteed and varies a lot by area.</p>
+      <div class="example"><div class="label">The example home, a few years later</div>
+        <div class="sum"><span>Value</span><span>$265,000</span><span>Mortgage still owed</span><span>−$185,000</span>
+          <span class="total pos">Your equity</span><span class="total pos">$80,000</span></div></div>
+    </section>
+
+    <section class="slide" data-title="Before you buy" hidden>
+      <p class="count">Card 5 of 6</p>
+      <h2>Before you buy: checks and closing costs</h2>
+      <p><b>Due diligence</b> means checking the home before you commit: its condition, the title, what similar homes sold for, rental demand and the true running costs.</p>
+      <p><b>Closing costs</b> are paid on top of the price when the sale completes: lender, legal, title and inspection fees. Plan for about 2–5% of the price.</p>
+      <div class="example"><div class="label">The example home</div>
+        <div class="sum"><span>Closing costs at 2–5%</span><span>$5,000–$12,500</span>
+          <span class="total">Cash in, with 3% closing</span><span class="total">$57,500</span></div></div>
+    </section>
+
+    <section class="slide" data-title="What happens next" hidden>
+      <p class="count">Card 6 of 6</p>
+      <h2>What happens next</h2>
+      <p>Your journey as a New Property Investor. You're at the start; the assistant in your dashboard walks you through each step and only asks for what it still needs.</p>
+      <ul class="journey-list" id="journeyList"></ul>
+    </section>
+  </div>
+
+  <div class="controls">
+    <button class="ghost" id="backBtn" type="button">Back</button>
+    <button class="ghost" id="pauseBtn" type="button" aria-pressed="false">Pause</button>
+    <span class="grow"></span>
+    <span class="timer" id="timer" aria-hidden="true"></span>
+    <button class="ghost" id="nextBtn" type="button">Next</button>
+  </div>
+  <p class="sr" id="srStatus" aria-live="polite"></p>
+
+  <div class="actions">
+    <button class="primary" id="continueBtn" type="button" disabled>Continue to your dashboard</button>
+    <div class="status" id="status"></div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  async function api(method, url, body) {
+    const init = { method, credentials: "same-origin" };
+    if (body !== undefined) { init.body = JSON.stringify(body); init.headers = { "Content-Type": "application/json" }; }
+    const res = await fetch(url, init);
+    let data = null; try { data = await res.json(); } catch (e) { /* not JSON */ }
+    if (!res.ok) throw new Error((data && data.detail) || `Request failed (${res.status}).`);
+    return data;
+  }
+
+  // Falls back to a static outline if the journeys endpoint isn't reachable
+  // (e.g. Supabase not configured yet) - the page still explains what's ahead.
+  const FALLBACK_STAGES = [
+    "Investor lead generation", "Contracting", "Investor onboarding", "Investment education",
+    "Property identification", "Property & market analysis", "Offer preparation",
+    "Mortgage assistance", "Property inspection", "Closing", "Post-closing property management",
+  ];
+
+  function renderJourney(titles) {
+    const list = $("journeyList");
+    list.replaceChildren();
+    titles.forEach((t, i) => {
+      const li = document.createElement("li");
+      if (i < 3) li.className = "now";          // the first steps are underway once they're here
+      const dot = document.createElement("span"); dot.className = "dot";
+      const txt = document.createElement("span"); txt.textContent = t;
+      li.append(dot, txt);
+      list.appendChild(li);
+    });
+  }
+
+  // ---- The deck: six cards, each shown for 10 seconds ----
+  const SECONDS = 10;
+  const slides = [...document.querySelectorAll(".slide")];
+  const deck = { i: 0, elapsed: 0, seen: slides.map(() => false), paused: false, last: 0, raf: 0 };
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function buildProgress() {
+    const bar = $("progress");
+    slides.forEach((s, i) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "seg"; b.setAttribute("role", "tab");
+      b.setAttribute("aria-label", `Card ${i + 1}: ${s.dataset.title}`);
+      b.appendChild(document.createElement("i"));
+      b.addEventListener("click", () => { if (deck.seen[i] || i <= furthest()) show(i); });
+      bar.appendChild(b);
+    });
+  }
+  const furthest = () => { const n = deck.seen.lastIndexOf(true); return n + 1; };
+  const allSeen = () => deck.seen.every(Boolean);
+
+  function paint() {
+    const segs = $("progress").children;
+    [...segs].forEach((seg, i) => {
+      const fill = i < deck.i || deck.seen[i] ? 1 : i === deck.i ? deck.elapsed / SECONDS : 0;
+      seg.firstChild.style.width = `${Math.min(1, fill) * 100}%`;
+      seg.dataset.seen = String(deck.seen[i]);
+      seg.setAttribute("aria-selected", String(i === deck.i));
+    });
+    const left = Math.ceil(SECONDS - deck.elapsed);
+    $("timer").textContent = deck.seen[deck.i] ? "" : `${left}s`;
+    $("backBtn").disabled = deck.i === 0;
+    // Next only once this card has had its 10 seconds (or on a card seen before).
+    $("nextBtn").disabled = deck.i === slides.length - 1 || !deck.seen[deck.i];
+    const remaining = deck.seen.reduce((t, seen, i) => t + (seen ? 0 : (i === deck.i ? SECONDS - deck.elapsed : SECONDS)), 0);
+    $("pauseBtn").hidden = allSeen();
+    $("continueBtn").disabled = !allSeen();
+    $("continueBtn").textContent = allSeen() ? "Continue to your dashboard" : `Continue to your dashboard (${Math.ceil(remaining)}s)`;
+  }
+
+  function show(i) {
+    deck.i = i;
+    deck.elapsed = deck.seen[i] ? SECONDS : 0;
+    slides.forEach((s, n) => { s.hidden = n !== i; s.classList.remove("enter"); });
+    if (!reduceMotion) { void slides[i].offsetWidth; slides[i].classList.add("enter"); }
+    $("srStatus").textContent = `Card ${i + 1} of ${slides.length}: ${slides[i].dataset.title}`;
+    paint();
+  }
+
+  function tick(now) {
+    const dt = deck.last ? (now - deck.last) / 1000 : 0;
+    deck.last = now;
+    if (!deck.paused && !document.hidden && !deck.seen[deck.i]) {
+      deck.elapsed = Math.min(SECONDS, deck.elapsed + Math.min(dt, 0.5));   // no jump after a background tab
+      if (deck.elapsed >= SECONDS) {
+        deck.seen[deck.i] = true;
+        if (deck.i < slides.length - 1) show(deck.i + 1);
+        else $("continueBtn").focus();
+      }
+      paint();
+    }
+    deck.raf = requestAnimationFrame(tick);
+  }
+
+  function startDeck() {
+    buildProgress();
+    show(0);
+    deck.raf = requestAnimationFrame(tick);
+    $("backBtn").addEventListener("click", () => { if (deck.i > 0) show(deck.i - 1); });
+    $("nextBtn").addEventListener("click", () => { if (!$("nextBtn").disabled) show(deck.i + 1); });
+    $("pauseBtn").addEventListener("click", () => {
+      deck.paused = !deck.paused;
+      $("pauseBtn").textContent = deck.paused ? "Resume" : "Pause";
+      $("pauseBtn").setAttribute("aria-pressed", String(deck.paused));
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.target.closest && e.target.closest("input, textarea")) return;
+      if (e.key === "ArrowLeft") $("backBtn").click();
+      if (e.key === "ArrowRight") $("nextBtn").click();
+    });
+  }
+
+  async function loadJourney() {
+    try {
+      const journeys = await api("GET", "/journeys/config/journeys");
+      const stages = (journeys.new && journeys.new.stages) || [];
+      renderJourney(stages.length ? stages.map(s => s.title) : FALLBACK_STAGES);
+    } catch (err) {
+      renderJourney(FALLBACK_STAGES);
+    }
+  }
+
+  function say(text, tone) { const s = $("status"); s.textContent = text || ""; s.className = "status " + (tone || ""); }
+
+  async function goToDashboard() {
+    try {
+      const data = await api("POST", "/auth/education-complete");
+      location.href = (data && data.redirect_url) || "/ui";
+    } catch (err) {
+      // Even if marking it "seen" fails, don't block the person on this page.
+      location.href = "/ui";
+    }
+  }
+
+  async function init() {
+    $("gate").hidden = false;
+    let account;
+    try {
+      account = await api("GET", "/auth/me");
+    } catch (err) {
+      location.href = "/login";
+      return;
+    }
+
+    // Only New Property Investor accounts see this page; anyone else who
+    // lands here (e.g. a stale bookmark) skips straight through.
+    if (account.role !== "new_investor") {
+      await goToDashboard();
+      return;
+    }
+
+    $("gate").hidden = true;
+    $("app").hidden = false;
+    $("hello").textContent = `Hi ${(account.name || "").split(" ")[0] || "there"}! Six short cards, one minute, then straight to your dashboard.`;
+    renderJourney(FALLBACK_STAGES);   // replaced by the live list below when it loads
+    startDeck();
+    loadJourney();
+  }
+
+  $("continueBtn").addEventListener("click", async () => {
+    if (!allSeen()) return;
+    cancelAnimationFrame(deck.raf);
+    $("continueBtn").disabled = true;
+    say("Taking you to your dashboard…");
+    await goToDashboard();
+  });
+
+  init();
+</script>
+</body>
+</html>

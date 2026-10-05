@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<title>Staybot · Your lease onboarding</title>
+<style>
+  :root { --brand:#FF385C; --brand-grad:linear-gradient(to right,#E61E4D 0%,#E31C5F 50%,#D70466 100%); --ink:#222; --ink-2:#6A6A6A; --line:#DDD; --soft:#F7F7F7; --ok:#008A05; --bad:#C13515; --warn:#B25E09; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif; color:var(--ink); background:#fff; font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased; }
+  header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 20px; border-bottom:1px solid #EBEBEB; position:sticky; top:0; background:#fff; z-index:5; }
+  .logo { color:var(--brand); font-weight:800; font-size:20px; letter-spacing:-.4px; }
+  .wrap { max-width:640px; margin:0 auto; padding:20px 16px 120px; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:48px; padding:12px 20px; border-radius:24px; border:1px solid var(--line); background:#fff; font:inherit; font-weight:600; color:var(--ink); text-decoration:none; cursor:pointer; }
+  .btn.primary { border:0; color:#fff; background:var(--brand-grad); }
+  .btn.dark { border:0; color:#fff; background:var(--ink); }
+  .btn:disabled { opacity:.45; cursor:not-allowed; }
+  .btn.small { min-height:38px; padding:8px 14px; font-size:14px; }
+  .help { border:1px solid var(--line); background:#fff; border-radius:20px; padding:8px 14px; font-weight:600; font:inherit; font-size:14px; cursor:pointer; }
+  .home { border:1px solid var(--line); border-radius:16px; padding:16px; margin-bottom:16px; }
+  .home b { display:block; font-size:18px; }
+  .muted { color:var(--ink-2); } .small { font-size:14px; }
+  .steps { display:flex; gap:6px; overflow-x:auto; padding:2px 0 10px; margin:0 0 8px; list-style:none; }
+  .steps button { display:flex; align-items:center; gap:8px; white-space:nowrap; border:1px solid var(--line); border-radius:22px; background:#fff; padding:6px 12px 6px 6px; font:inherit; font-size:14px; cursor:pointer; }
+  .steps button.on { border-color:var(--ink); box-shadow:0 0 0 1px var(--ink); }
+  .num { width:26px; height:26px; border-radius:50%; display:grid; place-items:center; font-weight:800; font-size:13px; border:1.5px solid var(--line); }
+  .num.done { background:var(--ink); color:#fff; border-color:var(--ink); }
+  .progress { height:6px; background:#EBEBEB; border-radius:3px; overflow:hidden; margin-bottom:18px; }
+  .progress i { display:block; height:100%; background:var(--brand-grad); }
+  .card { border:1px solid var(--line); border-radius:18px; padding:22px; }
+  .kicker { color:#E31C5F; font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.4px; }
+  h1 { font-size:26px; line-height:1.2; margin:4px 0 8px; letter-spacing:-.3px; }
+  label { display:flex; flex-direction:column; gap:6px; font-weight:600; margin-top:14px; }
+  input[type=text], input[type=email], select, textarea { font:inherit; padding:12px; border:1px solid var(--line); border-radius:12px; min-height:48px; width:100%; background:#fff; }
+  input:focus, select:focus, textarea:focus { outline:none; border-color:var(--ink); box-shadow:0 0 0 1px var(--ink); }
+  textarea { min-height:96px; }
+  .check { flex-direction:row; align-items:flex-start; gap:10px; font-weight:500; }
+  .check input { width:22px; height:22px; margin-top:2px; flex:none; }
+  .choice { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+  .foot { display:flex; justify-content:space-between; gap:10px; margin-top:22px; }
+  .status { margin-top:12px; font-weight:600; min-height:22px; }
+  .status.ok { color:var(--ok); } .status.bad { color:var(--bad); }
+  .doc { border:1px solid var(--line); border-radius:14px; padding:14px; margin-top:12px; }
+  .doc .chip { margin:8px 8px 0 0; }
+  .chip { display:inline-block; padding:3px 10px; border-radius:12px; font-size:13px; font-weight:700; background:var(--soft); }
+  .chip.ok { background:#E8F5E9; color:var(--ok); } .chip.bad { background:#FDECEA; color:var(--bad); } .chip.warn { background:#FFF3E0; color:var(--warn); }
+  dl { display:grid; grid-template-columns:auto 1fr; gap:6px 14px; margin:12px 0 0; }
+  dt { color:var(--ink-2); } dd { margin:0; font-weight:600; overflow-wrap:anywhere; }
+  .notice { border-radius:12px; padding:12px 14px; background:#FFF8EC; border:1px solid #F5D9A8; margin-top:12px; font-size:15px; }
+  .good { border-radius:12px; padding:12px 14px; background:#EEF8EF; border:1px solid #BFE3C3; margin-top:12px; }
+  .error { border-radius:16px; padding:22px; background:#FFF1EE; border:1px solid #F3C4B8; }
+  dialog { border:0; border-radius:18px; padding:22px; width:min(480px, calc(100% - 32px)); }
+  dialog::backdrop { background:rgba(0,0,0,.4); }
+</style>
+</head>
+<body>
+<header><span class="logo">staybot</span><button class="help" id="help-btn" type="button">Ask staff for help</button></header>
+<div class="wrap" id="app" aria-live="polite"><p class="muted">Loading your onboarding…</p></div>
+
+<dialog id="help">
+  <form method="dialog" id="help-form">
+    <h2 style="margin-top:0">Ask staff for help</h2>
+    <p class="muted small">Tell us what you need. A team member will reply on WhatsApp. Please don't send ID numbers or bank details here.</p>
+    <label>Your message<textarea id="help-text" maxlength="2000" required></textarea></label>
+    <div class="status" id="help-status" role="status"></div>
+    <div class="foot"><button class="btn" value="cancel" type="button" id="help-cancel">Close</button><button class="btn primary" type="submit" id="help-send">Send to staff</button></div>
+  </form>
+</dialog>
+
+<script>
+(function () {
+  "use strict";
+  const token = location.pathname.split("/")[2] || "";
+  const base = `/p/${encodeURIComponent(token)}/api`;
+  const app = document.getElementById("app");
+  const E = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+  let S = null, step = 0;
+
+  async function api(method, path, body, raw) {
+    const init = { method, headers: {} };
+    if (raw) { init.body = raw.data; init.headers["Content-Type"] = raw.type; init.headers["X-File-Name"] = raw.name; }
+    else if (body !== undefined) { init.body = JSON.stringify(body); init.headers["Content-Type"] = "application/json"; }
+    const res = await fetch(base + path, init);
+    let data = null; try { data = await res.json(); } catch (e) { /* ignore */ }
+    if (!res.ok) {
+      const d = data && data.detail;
+      throw Object.assign(new Error(typeof d === "string" ? d : Array.isArray(d) ? "Please check the highlighted details and try again." : "Something went wrong. Please try again."), { status: res.status });
+    }
+    return data;
+  }
+  const status = (node, text, tone) => { node.textContent = text || ""; node.className = "status " + (tone || ""); };
+
+  function steps() {
+    const p = S.party;
+    const docsDone = !S.documents.some((d) => d.required && d.status !== "accepted" && d.status !== "awaiting_review");
+    const decided = S.agreement.my_decision.status === "approved";
+    return [
+      { key: "me", title: p === "tenant" ? "Let's meet the tenant." : "Let's confirm the owner.", short: "Your details", done: !!(S.confirmed.role && S.confirmed.name) },
+      { key: "docs", title: "Let's collect the required documents.", short: "Documents", done: docsDone },
+      { key: "terms", title: "Let's agree on the rental terms.", short: "Rental terms", done: !!S.terms && decided },
+      { key: "review", title: "Let's review the agreement together.", short: "Review", done: decided || S.status === "finalized" },
+      { key: "final", title: "Your final lease PDF is ready.", short: "Final lease", done: S.final_available },
+    ];
+  }
+
+  async function load(keepStep) {
+    try {
+      S = await api("GET", "/state");
+      const list = steps();
+      if (!keepStep) { const firstOpen = list.findIndex((s) => !s.done); step = S.status === "finalized" ? 4 : firstOpen === -1 ? 4 : firstOpen; }
+      render();
+    } catch (err) {
+      app.replaceChildren(Object.assign(E("div", "error"), {}));
+      const box = app.firstChild;
+      box.append(E("h1", null, err.status === 410 ? "This link has expired" : "We couldn't open this link"), E("p", null, err.message),
+        E("p", "muted", "Reply LINK in your WhatsApp chat with Staybot to get a new private link."));
+      document.getElementById("help-btn").hidden = true;
+    }
+  }
+
+  let shownStep = null;
+  function render(message, tone) {
+    const list = steps(), s = list[step];
+    if (shownStep !== null && shownStep !== step) window.scrollTo(0, 0);
+    shownStep = step;
+    app.replaceChildren();
+    const home = E("div", "home");
+    home.append(E("span", "muted small", `Lease onboarding · ${S.reference}`), E("b", null, S.home.title + (S.home.unit ? ` · Unit ${S.home.unit}` : "")), E("span", "muted small", S.home.address || ""));
+    app.append(home);
+    app.append(E("p", "small muted", `You're the ${S.party} on this lease${S.other_party_name ? ` with ${S.other_party_name}` : ""}.${S.staff_name ? ` Your Staybot contact is ${S.staff_name}.` : ""}`));
+    const ul = E("ol", "steps"); ul.setAttribute("aria-label", "Your steps");
+    list.forEach((x, i) => {
+      const li = E("li"); const b = E("button", i === step ? "on" : ""); b.type = "button";
+      if (i === step) b.setAttribute("aria-current", "step");
+      b.append(E("span", "num" + (x.done ? " done" : ""), x.done ? "✓" : String(i + 1)), document.createTextNode(x.short));
+      b.onclick = () => { step = i; render(); };
+      li.append(b); ul.append(li);
+    });
+    app.append(ul);
+    const active = ul.querySelector(".on"); if (active && ul.scrollTo) ul.scrollTo({ left: active.parentElement.offsetLeft - 16 });
+    const bar = E("div", "progress"); const fill = E("i"); fill.style.width = `${Math.round(100 * list.filter((x) => x.done).length / list.length)}%`; bar.append(fill); app.append(bar);
+    const card = E("section", "card");
+    card.append(E("div", "kicker", `Step ${step + 1} of ${list.length}`), E("h1", null, s.title));
+    const out = E("div", "status"); out.setAttribute("role", "status");
+    ({ me: stepMe, docs: stepDocs, terms: stepTerms, review: stepReview, final: stepFinal })[s.key](card, out);
+    card.append(out);
+    if (message) status(out, message, tone);
+    app.append(card);
+    app.append(E("p", "muted small", `This private link is only for you and expires ${new Date(S.expires_at).toLocaleDateString()}. Please don't forward it.`));
+  }
+
+  function foot(card, onContinue, label) {
+    const f = E("div", "foot");
+    const back = E("button", "btn", "Back"); back.type = "button"; back.disabled = step === 0; back.onclick = () => { step -= 1; render(); };
+    const next = E("button", "btn primary", label || "Save and continue"); next.type = "button";
+    next.onclick = async () => { next.disabled = true; try { await onContinue(); } finally { next.disabled = false; } };
+    f.append(back, next); card.append(f);
+  }
+
+  function stepMe(card, out) {
+    const me = S.me;
+    card.append(E("p", "muted", "Please check your details. They will appear on the lease exactly as written here."));
+    if (S.status !== "active") { card.append(E("div", "good", "Your details are locked because the lease is final.")); foot(card, async () => { step += 1; render(); }, "Next"); return; }
+    const role = E("label", "check"); const roleBox = E("input"); roleBox.type = "checkbox"; roleBox.checked = !!S.confirmed.role;
+    role.append(roleBox, E("span", null, `Yes, I'm the ${S.party} for this home.`));
+    const name = E("input"); name.type = "text"; name.value = me.full_name || ""; name.maxLength = 200; name.autocomplete = "name";
+    const email = E("input"); email.type = "email"; email.value = me.email || ""; email.maxLength = 200; email.autocomplete = "email";
+    const lang = E("select"); [["en", "English"], ["es", "Español"]].forEach(([v, t]) => lang.add(new Option(t, v))); lang.value = me.preferred_language || "en";
+    const channel = E("select"); [["whatsapp", "WhatsApp only"], ["whatsapp_and_email", "WhatsApp and email"]].forEach(([v, t]) => channel.add(new Option(t, v))); channel.value = me.communication?.channel || "whatsapp";
+    const best = E("select"); [["any", "Any time"], ["morning", "Morning"], ["afternoon", "Afternoon"], ["evening", "Evening"]].forEach(([v, t]) => best.add(new Option(t, v))); best.value = me.communication?.best_time || "any";
+    const labelled = (t, c, hint) => { const l = E("label"); l.append(E("span", null, t), c); if (hint) l.append(E("span", "muted small", hint)); return l; };
+    card.append(role, labelled("Full legal name", name), labelled("Email (optional)", email, "Only used for lease updates if you choose WhatsApp and email."),
+      labelled("WhatsApp number", Object.assign(E("input"), { type: "text", value: me.whatsapp || "", disabled: true }), "To change your number, ask staff for help."),
+      labelled("Preferred language", lang, "Staybot messages are in English for now; staff will note your preference."), labelled("Keep in touch by", channel), labelled("Best time to reach you", best));
+    const wrong = E("button", "btn small", `I'm not the ${S.party}`); wrong.type = "button"; wrong.style.marginTop = "14px";
+    wrong.onclick = async () => { try { const r = await api("PUT", "/details", { full_name: name.value || me.full_name, email: null, preferred_language: lang.value, communication: { channel: channel.value, best_time: best.value }, role_confirmed: false }); status(out, r.message, "ok"); } catch (err) { status(out, err.message, "bad"); } };
+    card.append(wrong);
+    foot(card, async () => {
+      if (!roleBox.checked) { status(out, `Please confirm you're the ${S.party}, or tap “I'm not the ${S.party}”.`, "bad"); return; }
+      if (!name.value.trim()) { status(out, "Please enter your full legal name.", "bad"); return; }
+      try {
+        await api("PUT", "/details", { full_name: name.value, email: email.value.trim() || null, preferred_language: lang.value, communication: { channel: channel.value, best_time: best.value }, role_confirmed: true });
+        step += 1; await load(true); render("Saved. Thank you!", "ok");
+      } catch (err) { status(out, err.message, "bad"); }
+    });
+  }
+
+  function stepDocs(card, out) {
+    card.append(E("p", "muted", "Upload a clear photo or PDF of each document. Our team reviews every file. Uploading doesn't approve it automatically."));
+    const labels = { not_uploaded: ["Not uploaded yet", ""], awaiting_review: ["Uploaded · waiting for review", "warn"], accepted: ["Accepted", "ok"], changes_required: ["Please upload again", "bad"] };
+    if (!S.documents.length) card.append(E("div", "good", "No documents are needed from you."));
+    for (const d of S.documents) {
+      const box = E("div", "doc");
+      const [label, tone] = labels[d.status];
+      box.append(E("b", null, d.label + (d.required ? "" : " (optional)")), E("div", "muted small", `Why we need it: ${d.reason}`), E("span", "chip " + tone, label));
+      if (d.review_note && d.status === "changes_required") box.append(E("div", "notice", `Our team says: ${d.review_note}`));
+      if (S.status === "active" && d.status !== "accepted") {
+        const file = E("input"); file.type = "file"; file.accept = "application/pdf,image/jpeg,image/png"; file.hidden = true;
+        const up = E("button", "btn small dark", d.status === "not_uploaded" ? "Upload" : "Upload a new file"); up.type = "button"; up.style.marginTop = "10px";
+        up.onclick = () => file.click();
+        file.onchange = async () => {
+          const f = file.files[0]; if (!f) return;
+          if (f.size > 10 * 1024 * 1024) { status(out, "That file is larger than 10 MB. Please upload a smaller photo or PDF.", "bad"); return; }
+          status(out, `Uploading ${f.name}…`);
+          try { await api("POST", `/documents/${encodeURIComponent(d.doc_key)}`, undefined, { data: f, type: f.type || "application/octet-stream", name: f.name }); await load(true); render("Uploaded. Our team will review it.", "ok"); }
+          catch (err) { status(out, err.message, "bad"); }
+        };
+        box.append(up, file);
+      }
+      card.append(box);
+    }
+    card.append(E("p", "muted small", "Accepted: PDF, JPEG or PNG up to 10 MB. Only upload the documents listed here."));
+    foot(card, async () => { step += 1; render(); }, "Continue");
+  }
+
+  function money(v) { return v == null || v === "" ? "Not set yet" : `${S.terms.currency} ${Number(v).toLocaleString("en-US", { minimumFractionDigits: 2 })}`; }
+  function date(v) { return v ? new Date(v + "T12:00:00").toLocaleDateString("en-US", { dateStyle: "long" }) : "Not set yet"; }
+
+  function stepTerms(card, out) {
+    if (!S.terms) {
+      card.append(E("p", null, "Our team is preparing the rental terms. We'll message you on WhatsApp when they're ready to review."));
+      foot(card, async () => { step += 1; render(); }, "Continue"); return;
+    }
+    const t = S.terms;
+    card.append(E("p", "muted", "These are the terms in your agreement. If anything is different from what you agreed, request changes on the next step or ask staff for help."));
+    const dl = E("dl");
+    const schedule = { monthly: "Monthly", twice_monthly: "Twice a month", weekly: "Weekly" }[t.payment_schedule] || "Not set yet";
+    for (const [k, v] of [["Lease starts", date(t.lease_start)], ["Lease ends", date(t.lease_end)], ["Move-in", date(t.move_in_date)], ["Monthly rent", money(t.rent)],
+      ["Security deposit", money(t.deposit)], ["Payments", `${schedule}${t.rent_due_day ? `, due on day ${t.rent_due_day}` : ""}`],
+      ["Other charges", (t.charges || []).length ? t.charges.map((c) => `${c.label}: ${money(c.amount)} ${({ monthly: "per month", one_time: "one time", yearly: "per year" })[c.frequency]}`).join("; ") : "None"],
+      ["Occupants", (t.occupants || []).join(", ") || "Not set yet"], ["Pets", t.pets || "Not specified"], ["Utilities", t.utilities || "Not specified"],
+      ["Other agreed terms", (t.additional_terms || []).join(" • ") || "None"]]) dl.append(E("dt", null, k), E("dd", null, v));
+    card.append(dl);
+    foot(card, async () => { step += 1; render(); }, "Continue to review");
+  }
+
+  function stepReview(card, out) {
+    const a = S.agreement;
+    if (S.status === "finalized") { card.append(E("div", "good", "Both parties approved the agreement and it is final.")); foot(card, async () => { step += 1; render(); }, "See final lease"); return; }
+    if (!a.version) { card.append(E("p", null, "The agreement isn't ready yet. We'll message you on WhatsApp as soon as it is.")); foot(card, async () => { step += 1; render(); }, "Continue"); return; }
+    if (!a.ready_for_decision) { card.append(E("div", "notice", "The agreement is being updated by our team. Please check back soon.")); foot(card, async () => { load(); }, "Refresh"); return; }
+    card.append(E("p", "muted", `Please open and read agreement version ${a.version} before you decide. ${a.is_demo ? "This is a DEMO agreement for testing only." : ""}`));
+    const open = E("a", "btn dark", `Open agreement (version ${a.version})`); open.href = `${base}/agreement.pdf`; open.target = "_blank"; open.rel = "noopener";
+    card.append(open);
+    const mine = a.my_decision;
+    if (mine.status === "approved") card.append(E("div", "good", `You approved version ${a.version} on ${new Date(mine.at).toLocaleString()}. ${a.other_decision === "approved" ? "The other party has approved too." : "We're waiting for the other party."}`));
+    if (mine.status === "changes_requested") card.append(E("div", "notice", `You asked for changes on ${new Date(mine.at).toLocaleString()}. Our team will update the agreement and ask you to review again.`));
+    if (mine.status !== "approved") {
+      const readL = E("label", "check"); const read = E("input"); read.type = "checkbox";
+      readL.append(read, E("span", null, `I have read agreement version ${a.version}.`));
+      card.append(readL);
+      const choice = E("div", "choice");
+      const approve = E("button", "btn primary", "I approve this agreement"); approve.type = "button";
+      const change = E("button", "btn", "Request changes"); change.type = "button";
+      const note = E("textarea"); note.maxLength = 2000; note.placeholder = "What should change?"; note.hidden = true; note.setAttribute("aria-label", "What should change");
+      approve.onclick = async () => {
+        if (!read.checked) { status(out, "Please open the agreement and tick “I have read” first.", "bad"); return; }
+        approve.disabled = true;
+        try { await api("POST", "/decision", { version_id: a.version_id, decision: "approved", reviewed_agreement: true, note: "" }); await load(true); render("Thank you. Your approval is recorded. This is an approval, not a signature.", "ok"); }
+        catch (err) { status(out, err.message, "bad"); approve.disabled = false; if (err.status === 409) load(true); }
+      };
+      change.onclick = async () => {
+        if (note.hidden) { note.hidden = false; note.focus(); change.textContent = "Send change request"; return; }
+        if (!note.value.trim()) { status(out, "Please tell us what should change.", "bad"); return; }
+        try { await api("POST", "/decision", { version_id: a.version_id, decision: "changes_requested", reviewed_agreement: read.checked, note: note.value }); await load(true); render("Thanks. Our team will review your request and message you.", "ok"); }
+        catch (err) { status(out, err.message, "bad"); }
+      };
+      choice.append(approve, change); card.append(choice, note);
+    }
+    foot(card, async () => { step += 1; render(); }, "Continue");
+  }
+
+  function stepFinal(card, out) {
+    if (!S.final_available) {
+      card.append(E("p", null, "Your final lease PDF will be ready after both parties approve the agreement and our team completes the final checks. We'll send it to you on WhatsApp."));
+      const f = E("div", "foot"); const back = E("button", "btn", "Back"); back.type = "button"; back.onclick = () => { step -= 1; render(); }; f.append(back); card.append(f); return;
+    }
+    card.append(E("div", "good", "Your lease is final. Both parties approved the same version."));
+    const dl = E("a", "btn primary", "Download final lease PDF"); dl.href = `${base}/agreement.pdf`; dl.target = "_blank"; dl.rel = "noopener"; dl.style.marginTop = "14px";
+    card.append(dl, E("p", "muted small", "We also send this PDF to you on WhatsApp. Signatures were not collected electronically."));
+    const f = E("div", "foot"); const back = E("button", "btn", "Back"); back.type = "button"; back.onclick = () => { step -= 1; render(); }; f.append(back); card.append(f);
+  }
+
+  const dialog = document.getElementById("help");
+  document.getElementById("help-btn").onclick = () => { status(document.getElementById("help-status"), ""); dialog.showModal(); };
+  document.getElementById("help-cancel").onclick = () => dialog.close();
+  document.getElementById("help-form").onsubmit = async (e) => {
+    e.preventDefault();
+    const text = document.getElementById("help-text"), st = document.getElementById("help-status"), send = document.getElementById("help-send");
+    if (!text.value.trim()) return;
+    send.disabled = true;
+    try { const r = await api("POST", "/help", { message: text.value }); status(st, r.message, "ok"); text.value = ""; }
+    catch (err) { status(st, err.message, "bad"); }
+    finally { send.disabled = false; }
+  };
+  load();
+})();
+</script>
+</body>
+</html>

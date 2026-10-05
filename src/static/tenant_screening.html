@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script src="/assets/tab-session.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tenant screening · Staybot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #1B3A5C; --brand-dark: #12283F; --brand-soft: #EAF0F6; --accent: #B8873C;
+    --ink: #15191E; --ink-2: #5A6069;
+    --line: #E2E4E8; --line-soft: #EDEFF1;
+    --bg: #FFFFFF; --bg-soft: #F6F7F9;
+    --font-display: "Fraunces", Georgia, serif;
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: var(--font-sans);
+    color: var(--ink); background: var(--bg-soft); min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; padding: 40px 16px 80px;
+  }
+  .logo { display: flex; align-items: center; gap: 8px; color: var(--brand); font-weight: 700; font-size: 22px; text-decoration: none; margin-bottom: 20px; }
+  .logo svg { width: 28px; height: 28px; }
+  .wrap { width: 100%; max-width: 640px; }
+  .eyebrow {
+    display: block; margin: 0 auto 16px; width: fit-content;
+    background: var(--brand-soft); color: var(--brand-dark);
+    font-weight: 600; font-size: 13px; padding: 5px 14px; border-radius: 999px;
+  }
+  h1 { font-family: var(--font-display); font-weight: 600; font-size: 27px; margin: 0 0 8px; text-align: center; }
+  p.sub { color: var(--ink-2); margin: 0 0 28px; font-size: 15px; text-align: center; }
+
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 28px; margin-bottom: 16px; box-shadow: 0 2px 16px rgba(15,23,33,.05); }
+  .card h2 { font-size: 17px; margin: 0 0 14px; }
+
+  label { display: block; font-size: 13px; font-weight: 600; color: var(--ink-2); margin: 14px 0 6px; }
+  label:first-of-type { margin-top: 0; }
+  input, select, textarea {
+    width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 9px;
+    font-family: inherit; font-size: 14.5px; color: var(--ink); background: #fff;
+  }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--brand-soft); border-color: var(--brand); }
+  textarea { resize: vertical; min-height: 64px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .emi-details { display: none; }
+  .emi-details.show { display: block; }
+  .hint { font-size: 12.5px; color: var(--ink-2); margin-top: 4px; }
+
+  .file-drop {
+    border: 1.5px dashed var(--line); border-radius: 10px; padding: 18px; text-align: center;
+    font-size: 13.5px; color: var(--ink-2); cursor: pointer; margin-top: 6px;
+  }
+  .file-drop.has-file { border-color: var(--brand); color: var(--brand-dark); font-weight: 600; }
+  .file-drop input[type=file] { display: none; }
+
+  .actions { position: sticky; bottom: 16px; margin-top: 8px; }
+  button.primary {
+    width: 100%; padding: 14px; border: none; border-radius: 12px; background: var(--brand);
+    color: #fff; font-weight: 700; font-size: 15.5px; cursor: pointer; box-shadow: 0 4px 16px rgba(27,58,92,.3);
+  }
+  button.primary:hover { background: var(--brand-dark); }
+  button.primary:disabled { opacity: .6; cursor: default; }
+  .status { min-height: 20px; margin-top: 12px; font-size: 13.5px; text-align: center; }
+  .status.bad { color: #C0392B; }
+
+  #gate { text-align: center; color: var(--ink-2); padding: 60px 0; }
+</style>
+</head>
+<body>
+<!-- Log out - every user (shared helper in /assets/tab-session.js). -->
+<style>
+  .sb-logout { position: fixed; top: 18px; right: 20px; z-index: 50; display: inline-flex; align-items: center; gap: 7px;
+    border: 1px solid #DDDDDD; background: #fff; color: #222; border-radius: 999px; padding: 8px 14px 8px 12px;
+    font: 600 13.5px/1 inherit; font-family: inherit; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+  .sb-logout:hover { border-color: #222; }
+  .sb-logout:focus-visible { outline: 2px solid #1B3A5C; outline-offset: 2px; }
+  .sb-logout:disabled { opacity: .6; cursor: default; }
+  @media (max-width: 560px) { .sb-logout { top: 12px; right: 12px; padding: 7px 11px; } }
+</style>
+<button class="sb-logout" id="sb-logout" type="button">
+  <svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><path d="M8 4H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3M13 14l4-4-4-4M17 10H8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  Log out
+</button>
+<script>
+  document.getElementById("sb-logout").addEventListener("click", async function () {
+    this.disabled = true;
+    let me = null;
+    try { const r = await fetch("/auth/me"); if (r.ok) me = await r.json(); } catch (e) { /* ignore */ }
+    if (me) {
+      if (window.staybotLogout) await window.staybotLogout(false);
+      else { try { await fetch("/auth/logout", { method: "POST" }); } catch (e) { /* leave anyway */ } }
+      if (me.role === "admin") location.href = "/admin/login";
+      else location.href = "/login";
+      return;
+    }
+    // Shared team password: replace the browser's saved password so it asks again.
+    try { await fetch(location.pathname, { headers: { Authorization: "Basic " + btoa("logged-out:" + Date.now()) }, cache: "no-store" }); } catch (e) { /* ignore */ }
+    location.href = "/login";
+  });
+</script>
+
+
+<a class="logo" href="/portal">
+  <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+    <path d="M16 2.5c.9 0 1.7.5 2.2 1.3l11 19.1c1.6 2.8-.4 6.3-3.6 6.3-1.4 0-2.7-.7-3.5-1.8L16 20.2l-6.1 7.2c-.8 1.1-2.1 1.8-3.5 1.8-3.2 0-5.2-3.5-3.6-6.3l11-19.1c.5-.8 1.3-1.3 2.2-1.3zm0 4.4L6.1 24.2c-.4.7.1 1.6.9 1.6.4 0 .7-.2.9-.4L16 15.8l8.1 9.6c.2.3.5.4.9.4.8 0 1.3-.9.9-1.6L16 6.9z"/>
+  </svg>
+  staybot
+</a>
+
+<div id="gate" hidden>Loading…</div>
+
+<div class="wrap" id="app" hidden>
+  <div class="eyebrow">Tenant</div>
+  <h1>Before we get started</h1>
+  <p class="sub" id="hello">A quick screening form - two minutes, then straight to your dashboard.</p>
+
+  <form id="form">
+    <div class="card">
+      <h2>Your details</h2>
+
+      <label for="name">Full name</label>
+      <input id="name" required maxlength="120" autocomplete="name">
+
+      <label for="email">Email</label>
+      <input id="email" type="email" required maxlength="200" autocomplete="email">
+
+      <label for="phone">Phone number</label>
+      <input id="phone" required maxlength="40" autocomplete="tel">
+    </div>
+
+    <div class="card">
+      <h2>Employment &amp; income</h2>
+
+      <label for="employment_status">Employment status</label>
+      <select id="employment_status" required>
+        <option value="" disabled selected>Select one</option>
+        <option value="employed">Employed</option>
+        <option value="self_employed">Self-employed</option>
+        <option value="unemployed">Unemployed</option>
+        <option value="student">Student</option>
+        <option value="retired">Retired</option>
+      </select>
+
+      <div class="row2">
+        <div>
+          <label for="monthly_income">Monthly income</label>
+          <input id="monthly_income" type="number" min="0" step="1" required inputmode="decimal">
+        </div>
+        <div>
+          <label for="annual_income">Annual income</label>
+          <input id="annual_income" type="number" min="0" step="1" required inputmode="decimal">
+        </div>
+      </div>
+
+      <label for="proof_of_income">Proof of income</label>
+      <div class="file-drop" id="fileDrop">
+        <span id="fileDropLabel">Click to upload a PDF, JPEG or PNG (max 10 MB) - a payslip, offer letter or bank statement</span>
+        <input type="file" id="proof_of_income" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" required>
+      </div>
+
+      <label>
+        <input type="checkbox" id="has_emi" style="width:auto;display:inline-block;vertical-align:middle;margin-right:6px">
+        <span style="font-weight:600;font-size:13.5px;color:var(--ink)">I currently have an EMI / ongoing loan</span>
+      </label>
+      <div class="emi-details" id="emiDetails">
+        <label for="emi_text">EMI details</label>
+        <textarea id="emi_text" maxlength="500" placeholder="Lender, monthly amount, remaining term..."></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Anything else we should know?</h2>
+      <textarea id="notes" maxlength="1000" placeholder="References, co-signer, move-in timeline, questions..."></textarea>
+    </div>
+
+    <div class="actions">
+      <button class="primary" id="submitBtn" type="submit">Submit &amp; continue to your dashboard</button>
+      <div class="status" id="status"></div>
+    </div>
+  </form>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  async function api(method, url, body, isFile) {
+    const init = { method, credentials: "same-origin" };
+    if (isFile) {
+      init.body = body.data;
+      init.headers = { "Content-Type": body.contentType, "X-File-Name": body.name };
+    } else if (body !== undefined) {
+      init.body = JSON.stringify(body);
+      init.headers = { "Content-Type": "application/json" };
+    }
+    const res = await fetch(url, init);
+    let data = null; try { data = await res.json(); } catch (e) { /* not JSON */ }
+    if (!res.ok) throw new Error((data && data.detail) || `Request failed (${res.status}).`);
+    return data;
+  }
+
+  function say(text, tone) { const s = $("status"); s.textContent = text || ""; s.className = "status " + (tone || ""); }
+
+  let selectedFile = null;
+
+  $("fileDrop").addEventListener("click", () => $("proof_of_income").click());
+  $("proof_of_income").addEventListener("change", () => {
+    const f = $("proof_of_income").files[0];
+    selectedFile = f || null;
+    $("fileDrop").classList.toggle("has-file", !!f);
+    $("fileDropLabel").textContent = f ? `Selected: ${f.name}` : "Click to upload a PDF, JPEG or PNG (max 10 MB)";
+  });
+
+  $("has_emi").addEventListener("change", () => {
+    $("emiDetails").classList.toggle("show", $("has_emi").checked);
+  });
+
+  async function init() {
+    $("gate").hidden = false;
+    let account;
+    try {
+      account = await api("GET", "/auth/me");
+    } catch (err) {
+      location.href = "/login";
+      return;
+    }
+
+    // Only tenant accounts that haven't finished this see the form; anyone
+    // else who lands here (stale bookmark, already done) skips straight through.
+    if (account.role !== "tenant" || account.screening_seen) {
+      location.href = "/ui";
+      return;
+    }
+
+    $("gate").hidden = true;
+    $("app").hidden = false;
+    $("hello").textContent = `Hi ${(account.name || "").split(" ")[0] || "there"}! A quick screening form before your dashboard.`;
+    $("name").value = account.name || "";
+    $("email").value = account.email || "";
+  }
+
+  $("form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!selectedFile) { say("Upload proof of income to continue.", "bad"); return; }
+
+    $("submitBtn").disabled = true;
+    try {
+      say("Saving your details…");
+      await api("POST", "/auth/screening/details", {
+        name: $("name").value.trim(),
+        email: $("email").value.trim(),
+        phone: $("phone").value.trim(),
+        employment_status: $("employment_status").value,
+        monthly_income: Number($("monthly_income").value || 0),
+        annual_income: Number($("annual_income").value || 0),
+        has_emi: $("has_emi").checked,
+        emi_details: $("emi_text").value.trim(),
+        notes: $("notes").value.trim(),
+      });
+
+      say("Uploading proof of income…");
+      const data = await selectedFile.arrayBuffer();
+      await api("POST", "/auth/screening/document", {
+        data, contentType: selectedFile.type, name: selectedFile.name,
+      }, true);
+
+      say("Finishing up…");
+      const result = await api("POST", "/auth/screening/complete");
+      location.href = (result && result.redirect_url) || "/ui";
+    } catch (err) {
+      say(err.message, "bad");
+      $("submitBtn").disabled = false;
+    }
+  });
+
+  init();
+</script>
+</body>
+</html>

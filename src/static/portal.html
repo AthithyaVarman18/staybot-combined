@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script src="/assets/tab-session.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Staybot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #1B3A5C; --brand-dark: #12283F; --brand-soft: #EAF0F6; --accent: #B8873C;
+    --ink: #15191E; --ink-2: #5A6069;
+    --line: #E2E4E8; --line-soft: #EDEFF1;
+    --bg: #FFFFFF; --bg-soft: #F6F7F9;
+    --font-display: "Fraunces", Georgia, serif;
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; font-family: var(--font-sans);
+    color: var(--ink); background: var(--bg); display: flex; flex-direction: column;
+  }
+  header {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 12px 20px; border-bottom: 1px solid var(--line-soft); background: #fff; flex: 0 0 auto;
+  }
+  .logo { display: flex; align-items: center; gap: 8px; color: var(--brand); font-weight: 700; font-size: 19px; text-decoration: none; }
+  .logo svg { width: 24px; height: 24px; }
+  .who { display: flex; align-items: center; gap: 10px; }
+  .badge { font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 999px; background: var(--brand-soft); color: var(--brand-dark); white-space: nowrap; }
+  .who .name { font-size: 13px; color: var(--ink-2); }
+  button.ghost { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 7px 12px; font-size: 13px; cursor: pointer; color: var(--ink); }
+  button.ghost:hover { background: var(--bg-soft); }
+
+  main { flex: 1; display: flex; min-height: 0; }
+
+  /* Tenant-only: property browser column. Investor-only: journey/portfolio column. */
+  .listings-col { width: 320px; flex: 0 0 320px; border-right: 1px solid var(--line-soft); overflow-y: auto; padding: 16px; }
+  .listings-col h2 { font-size: 14px; margin: 18px 0 10px; color: var(--ink-2); text-transform: uppercase; letter-spacing: .04em; }
+  .listings-col h2:first-child { margin-top: 0; }
+  .listing-card {
+    border: 1.5px solid var(--line); border-radius: 12px; padding: 12px; margin-bottom: 10px; cursor: pointer;
+    transition: border-color .1s, background .1s;
+  }
+  .listing-card:hover { border-color: #bbb; }
+  .listing-card.on { border-color: var(--brand); background: var(--brand-soft); }
+  .listing-card .t { font-weight: 700; font-size: 13.5px; }
+  .listing-card .m { color: var(--ink-2); font-size: 12.5px; margin-top: 3px; }
+  .listing-card .p { color: var(--brand-dark); font-weight: 700; font-size: 13px; margin-top: 6px; }
+  .listing-card.general { display: flex; align-items: center; gap: 8px; }
+
+  /* Investor journey track */
+  .stage-track { display: flex; flex-direction: column; gap: 2px; }
+  .stage-step { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; font-size: 13px; }
+  .stage-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 3px; flex: 0 0 auto; background: var(--line); }
+  .stage-step.done .stage-dot { background: #1a7f37; }
+  .stage-step.current .stage-dot { background: var(--brand); box-shadow: 0 0 0 3px #FFE1E8; }
+  .stage-step.current .stage-title { font-weight: 700; color: var(--brand-dark); }
+  .stage-step .stage-title { color: var(--ink); }
+  .stage-step.done .stage-title { color: var(--ink-2); }
+  .stage-desc { font-size: 12.5px; color: var(--ink-2); margin: 6px 0 4px 20px; }
+  .portfolio-card { border: 1px solid var(--line); border-radius: 10px; padding: 10px; margin-bottom: 8px; font-size: 12.5px; }
+  .portfolio-card .t { font-weight: 700; font-size: 13px; }
+  .add-property { border: 1px dashed var(--line); border-radius: 10px; padding: 10px; margin-top: 4px; }
+  .add-property input { width: 100%; padding: 7px 9px; border: 1px solid var(--line); border-radius: 7px; font-size: 12.5px; margin-bottom: 6px; }
+  .add-property button { width: 100%; border: none; background: var(--ink); color: #fff; border-radius: 7px; padding: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+  .side-empty { font-size: 12.5px; color: var(--ink-2); }
+
+  /* Chat column */
+  .chat-col { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .intro { padding: 18px 20px 6px; }
+  .intro h1 { font-size: 18px; margin: 0 0 4px; }
+  .intro p { color: var(--ink-2); font-size: 14px; margin: 0; }
+
+  .messages { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+  .msg { max-width: 82%; padding: 11px 14px; border-radius: 14px; font-size: 14.5px; line-height: 1.45; white-space: pre-wrap; }
+  .msg.user { align-self: flex-end; background: var(--brand); color: #fff; border-bottom-right-radius: 4px; }
+  .msg.assistant { align-self: flex-start; background: var(--bg-soft); border-bottom-left-radius: 4px; }
+  .msg.typing { align-self: flex-start; background: var(--bg-soft); color: var(--ink-2); font-style: italic; }
+
+  .composer { border-top: 1px solid var(--line-soft); padding: 14px 20px; display: flex; gap: 10px; flex: 0 0 auto; }
+  .composer textarea {
+    flex: 1; resize: none; border: 1px solid var(--line); border-radius: 10px; padding: 11px 14px;
+    font: inherit; font-size: 14.5px; max-height: 120px;
+  }
+  .composer textarea:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
+  .composer button { border: none; background: var(--brand); color: #fff; border-radius: 10px; padding: 0 20px; font-weight: 700; cursor: pointer; }
+  .composer button:hover { background: var(--brand-dark); }
+  .composer button:disabled { opacity: .5; cursor: default; }
+
+  .gate { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--ink-2); font-size: 14px; width: 100%; }
+
+  @media (max-width: 760px) {
+    main { flex-direction: column; }
+    .listings-col { width: 100%; flex: 0 0 auto; max-height: 220px; border-right: none; border-bottom: 1px solid var(--line-soft); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/portal">
+    <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+      <path d="M16 2.5c.9 0 1.7.5 2.2 1.3l11 19.1c1.6 2.8-.4 6.3-3.6 6.3-1.4 0-2.7-.7-3.5-1.8L16 20.2l-6.1 7.2c-.8 1.1-2.1 1.8-3.5 1.8-3.2 0-5.2-3.5-3.6-6.3l11-19.1c.5-.8 1.3-1.3 2.2-1.3zm0 4.4L6.1 24.2c-.4.7.1 1.6.9 1.6.4 0 .7-.2.9-.4L16 15.8l8.1 9.6c.2.3.5.4.9.4.8 0 1.3-.9.9-1.6L16 6.9z"/>
+    </svg>
+    staybot
+  </a>
+  <div class="who" id="who" hidden>
+    <span class="badge" id="role-badge"></span>
+    <span class="name" id="name-label"></span>
+    <button class="ghost" id="reset">New chat</button>
+    <button class="ghost" id="logout">Log out</button>
+  </div>
+</header>
+
+<main>
+  <div id="gate" class="gate">Loading…</div>
+
+  <div id="listingsCol" class="listings-col" hidden>
+    <div id="listingsBody"></div>
+  </div>
+
+  <div id="app" class="chat-col" hidden>
+    <div class="intro">
+      <h1 id="intro-h1"></h1>
+      <p id="intro-p"></p>
+    </div>
+    <div class="messages" id="messages"></div>
+    <div class="composer">
+      <textarea id="input" rows="1" placeholder="Type a message…"></textarea>
+      <button id="send" type="button">Send</button>
+    </div>
+  </div>
+</main>
+<p style="text-align:center;font-size:12px;margin:8px 0 16px"><a href="/privacy" target="_blank" rel="noopener" style="color:inherit;opacity:.7">Privacy policy</a></p>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, text, cls) => { const n = document.createElement(tag); if (text != null) n.textContent = text; if (cls) n.className = cls; return n; };
+
+  const INTROS = {
+    tenant: ["Looking for a home", "Pick a home on the left, or ask a general question and I'll help you find one."],
+    new_investor: ["New Property Investor", "First time investing in real estate? I'll walk you through it step by step - goals, budget, financing and more."],
+    existing_investor: ["Existing Property Investor", "Let's grow your portfolio. Tell me what you're looking to do next."],
+  };
+  const BADGES = { tenant: "Tenant", new_investor: "New Property Investor", existing_investor: "Existing Property Investor" };
+
+  let account = null;
+  let allProperties = [];
+  let listingId = null;       // null = general enquiry (tenant) / not applicable (investor)
+  let listingTitle = null;
+  let propertyContext = null;
+  let history = [];
+  let sending = false;
+
+  async function api(method, url, body) {
+    const init = { method, credentials: "same-origin" };
+    if (body !== undefined) { init.body = JSON.stringify(body); init.headers = { "Content-Type": "application/json" }; }
+    const res = await fetch(url, init);
+    let data = null; try { data = await res.json(); } catch (e) { /* not JSON */ }
+    if (!res.ok) throw { status: res.status, message: (data && data.detail) || `Request failed (${res.status}).` };
+    return data;
+  }
+
+  function addMessage(role, text) {
+    const m = document.createElement("div");
+    m.className = "msg " + role;
+    m.textContent = text;
+    $("messages").appendChild(m);
+    $("messages").scrollTop = $("messages").scrollHeight;
+    return m;
+  }
+
+  function greeting() {
+    const [, p] = INTROS[account.role] || ["Welcome", "How can I help?"];
+    if (account.role === "tenant" && listingTitle) {
+      return `Hi ${account.name.split(" ")[0] || ""}! Ask me anything about ${listingTitle}.`;
+    }
+    return `Hi ${account.name.split(" ")[0] || ""}! ${p}`;
+  }
+
+  // -----------------------------------------------------------------
+  // Tenant property browser
+  // -----------------------------------------------------------------
+
+  function listingMeta(p) {
+    const bits = [];
+    if (p.bedrooms) bits.push(`${p.bedrooms} BHK`);
+    if (p.area || p.city) bits.push([p.area, p.city].filter(Boolean).join(", "));
+    return bits.join(" · ");
+  }
+
+  function renderListings() {
+    const box = $("listingsBody");
+    box.replaceChildren();
+    box.append(el("h2", "Homes"));
+
+    const general = document.createElement("div");
+    general.className = "listing-card general" + (listingId === null ? " on" : "");
+    general.textContent = "💬 General enquiry (no specific home)";
+    general.onclick = () => selectListing(null, null, null);
+    box.append(general);
+
+    for (const p of allProperties) {
+      const card = document.createElement("div");
+      card.className = "listing-card" + (listingId === p.id ? " on" : "");
+      card.innerHTML = `<div class="t"></div><div class="m"></div><div class="p"></div>`;
+      card.querySelector(".t").textContent = p.title || "Home";
+      card.querySelector(".m").textContent = listingMeta(p);
+      card.querySelector(".p").textContent = p.price_label || "";
+      card.onclick = () => selectListing(p.id, p.title, p.context);
+      box.append(card);
+    }
+  }
+
+  async function selectListing(id, title, context) {
+    if (id === listingId) return;
+    listingId = id; listingTitle = title; propertyContext = context;
+    renderListings();
+    $("intro-h1").textContent = title || (INTROS.tenant[0]);
+    $("intro-p").textContent = title ? "Ask about price, availability, amenities, or request a viewing." : INTROS.tenant[1];
+    await loadHistory();
+  }
+
+  // -----------------------------------------------------------------
+  // Investor journey panel (New Property Investor / Existing Property Investor)
+  // -----------------------------------------------------------------
+
+  let myInvestor = null;
+
+  async function loadInvestorPanel() {
+    try {
+      myInvestor = await api("GET", "/me/investor");
+    } catch (err) {
+      myInvestor = null; // no profile yet (chat hasn't created one) - fine, panel just stays minimal
+    }
+    renderInvestorPanel();
+  }
+
+  function renderInvestorPanel() {
+    const box = $("listingsBody");
+    box.replaceChildren();
+    box.append(el("h2", "Your journey"));
+
+    if (!myInvestor) {
+      box.append(el("p", "Send a message in chat to get started - your journey will appear here.", "side-empty"));
+      return;
+    }
+
+    const { investor, journey_label, stages, current_stage } = myInvestor;
+    box.append(el("div", journey_label || "Getting classified…", "listing-card general"));
+
+    const track = el("div", null, "stage-track");
+    let passedCurrent = false;
+    for (const s of stages) {
+      const isCurrent = s.key === current_stage;
+      const step = el("div", null, "stage-step" + (isCurrent ? " current" : passedCurrent ? "" : " done"));
+      if (isCurrent) passedCurrent = true;
+      const dot = el("span", null, "stage-dot");
+      const title = el("span", s.title, "stage-title");
+      step.append(dot, title);
+      track.append(step);
+      if (isCurrent) {
+        const desc = el("div", s.description, "stage-desc");
+        track.append(desc);
+      }
+    }
+    box.append(track);
+
+    if (investor.investor_type === "existing") {
+      box.append(el("h2", "Your properties"));
+      const portfolio = myInvestor.portfolio || [];
+      if (!portfolio.length) box.append(el("p", "None recorded yet - add one below.", "side-empty"));
+      for (const p of portfolio) {
+        const card = el("div", null, "portfolio-card");
+        card.append(el("div", p.address || "No address", "t"));
+        const bits = [p.relationship];
+        if (p.monthly_rent) bits.push(`rent ${p.monthly_rent}`);
+        if (p.estimated_value) bits.push(`value ${p.estimated_value}`);
+        card.append(el("div", bits.filter(Boolean).join(" · ")));
+        box.append(card);
+      }
+      box.append(portfolioForm());
+    }
+  }
+
+  function portfolioForm() {
+    const form = el("div", null, "add-property");
+    const addr = document.createElement("input"); addr.placeholder = "Address";
+    const rent = document.createElement("input"); rent.placeholder = "Monthly rent (optional)"; rent.type = "number";
+    const btn = el("button", "Add property");
+    btn.onclick = async () => {
+      if (!addr.value.trim()) return;
+      btn.disabled = true; btn.textContent = "Adding…";
+      try {
+        await api("POST", "/me/investor/portfolio", {
+          address: addr.value.trim(), monthly_rent: rent.value ? Number(rent.value) : undefined,
+        });
+        await loadInvestorPanel();
+      } catch (err) {
+        btn.disabled = false; btn.textContent = "Add property";
+        addMessage("assistant", "Couldn't save that property: " + err.message);
+      }
+    };
+    form.append(addr, rent, btn);
+    return form;
+  }
+
+  // -----------------------------------------------------------------
+  // Init / chat
+  // -----------------------------------------------------------------
+
+  async function loadHistory() {
+    $("messages").innerHTML = "";
+    history = [];
+    try {
+      const params = { session_id: account.session_id };
+      if (listingId) params.listing_id = listingId;
+      const saved = await api("GET", `/conversations/resume?${new URLSearchParams(params)}`);
+      history = saved.history || [];
+      for (const m of history) addMessage(m.role, m.content);
+    } catch (err) { /* fine to start fresh */ }
+    if (!history.length) addMessage("assistant", greeting());
+  }
+
+  async function init() {
+    try {
+      account = await api("GET", "/auth/me");
+    } catch (err) {
+      location.href = "/login";
+      return;
+    }
+
+    $("gate").hidden = true;
+    $("app").hidden = false;
+    $("who").hidden = false;
+    $("role-badge").textContent = BADGES[account.role] || account.role;
+    $("name-label").textContent = account.name;
+    const [h1, p] = INTROS[account.role] || ["Welcome", "How can I help?"];
+    $("intro-h1").textContent = h1;
+    $("intro-p").textContent = p;
+
+    // Tenant-specific: a browsable list of homes next to the chat.
+    // Investor-specific: their journey stage track (and, for Existing
+    // Property Investor, a self-service portfolio list) next to the chat.
+    if (account.role === "tenant") {
+      $("listingsCol").hidden = false;
+      try {
+        const data = await api("GET", "/properties");
+        allProperties = data.properties || [];
+      } catch (err) { /* listings just won't show */ }
+      renderListings();
+    } else if (account.role === "new_investor" || account.role === "existing_investor") {
+      $("listingsCol").hidden = false;
+      await loadInvestorPanel();
+    }
+
+    await loadHistory();
+  }
+
+  async function send() {
+    const box = $("input");
+    const text = box.value.trim();
+    if (!text || sending) return;
+    sending = true;
+    box.value = ""; box.style.height = "auto";
+    addMessage("user", text);
+    const typing = addMessage("assistant typing", "…thinking");
+    $("send").disabled = true;
+
+    try {
+      const result = await api("POST", "/analyze", {
+        message: text, conversation_history: history, session_id: account.session_id, persona: account.role,
+        listing_id: listingId, listing_title: listingTitle, property_context: propertyContext,
+      });
+      typing.remove();
+      addMessage("assistant", result.response || result.next_question || "…");
+      history.push({ role: "user", content: text });
+      history.push({ role: "assistant", content: result.response || "" });
+      if (result.investor_journey && result.investor_journey.tracked) await loadInvestorPanel();
+    } catch (err) {
+      typing.remove();
+      addMessage("assistant", "Sorry, something went wrong: " + err.message);
+    } finally {
+      sending = false;
+      $("send").disabled = false;
+      box.focus();
+    }
+  }
+
+  $("send").addEventListener("click", send);
+  $("input").addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+  });
+  $("input").addEventListener("input", (e) => { e.target.style.height = "auto"; e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px"; });
+
+  $("logout").addEventListener("click", async () => {
+    try { await api("POST", "/auth/logout"); } catch (e) { /* ignore */ }
+    location.href = "/login";
+  });
+
+  $("reset").addEventListener("click", async () => {
+    if (!confirm("Start a new conversation? This clears the current thread.")) return;
+    try {
+      const params = { session_id: account.session_id };
+      if (listingId) params.listing_id = listingId;
+      await api("DELETE", `/conversations/resume?${new URLSearchParams(params)}`);
+    } catch (e) { /* ignore */ }
+    $("messages").innerHTML = "";
+    history = [];
+    addMessage("assistant", greeting());
+  });
+
+  init();
+</script>
+<script src="/ui/celebrations.js"></script>
+<script src="/ui/notifications.js"></script>
+</body>
+</html>

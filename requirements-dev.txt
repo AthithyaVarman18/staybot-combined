@@ -1,0 +1,4 @@
+# Local development stack and database tests only (dev/local_supabase.py)
+-r requirement.txt
+psycopg[binary]==3.3.5
+httpx

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script src="/assets/tab-session.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Staff · Staybot</title>
+  <!-- Hidden staff admin login. Not linked from any customer page.
+       Only the admin account in the accounts table (role = 'admin',
+       see supabase_admin.sql) can log in here. -->
+  <style>
+    :root {
+      --brand: #1B3A5C; --brand-dark: #12283F; --ink: #15191E; --ink-2: #5A6069;
+      --line: #E2E4E8; --bg-soft: #F6F7F9; --bad: #B42318; --ok: #1E7B4F;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 15px; color: var(--ink); background: var(--bg-soft);
+      min-height: 100vh; display: grid; place-items: center; padding: 24px;
+    }
+    .card {
+      width: 100%; max-width: 380px; background: #fff; border: 1px solid var(--line);
+      border-radius: 16px; padding: 32px 28px; box-shadow: 0 2px 28px rgba(15,23,33,.07);
+    }
+    h1 { font-size: 20px; margin-bottom: 4px; }
+    p.sub { color: var(--ink-2); font-size: 14px; margin-bottom: 22px; }
+    label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    input {
+      width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 8px;
+      font: inherit; margin-bottom: 16px; outline: none;
+    }
+    input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(27,58,92,.14); }
+    button {
+      width: 100%; padding: 12px; border: 0; border-radius: 8px; background: var(--brand);
+      color: #fff; font: inherit; font-weight: 600; cursor: pointer;
+    }
+    button:hover { background: var(--brand-dark); }
+    button:disabled { opacity: .6; cursor: default; }
+    .status { min-height: 20px; margin-top: 14px; font-size: 14px; }
+    .status.bad { color: var(--bad); }
+    .status.ok { color: var(--ok); }
+  </style>
+</head>
+<body>
+  <form class="card" id="form" novalidate>
+    <h1>Staff login</h1>
+    <p class="sub">Admin access only.</p>
+    <label for="email">Email</label>
+    <input id="email" type="email" autocomplete="username" required>
+    <label for="password">Password</label>
+    <input id="password" type="password" autocomplete="current-password" required>
+    <button id="submit" type="submit">Log in</button>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+  </form>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function say(text, tone) {
+      $("status").textContent = text || "";
+      $("status").className = "status " + (tone || "");
+    }
+
+    $("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = $("email").value.trim();
+      const password = $("password").value;
+      if (!email || !password) { say("Enter your email and password.", "bad"); return; }
+
+      $("submit").disabled = true;
+      say("Logging in…");
+      try {
+        const res = await fetch("/auth/admin/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok) {
+          const detail = data && data.detail;
+          throw new Error(typeof detail === "string" ? detail : "Incorrect email or password.");
+        }
+        say("Welcome…", "ok");
+        location.href = data.redirect_url || "/ui";
+      } catch (err) {
+        say(err.message, "bad");
+        $("submit").disabled = false;
+      }
+    });
+
+    window.addEventListener("pageshow", (event) => {
+      if (event.persisted) { $("submit").disabled = false; say(""); }
+    });
+  </script>
+</body>
+</html>

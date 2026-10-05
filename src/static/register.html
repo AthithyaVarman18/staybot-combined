@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script src="/assets/tab-session.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create your account · Staybot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ---------- Design tokens ---------- */
+    :root {
+      --brand: #1B3A5C;
+      --brand-dark: #12283F;
+      --brand-soft: #EAF0F6;
+      --accent: #B8873C;
+      --ink: #15191E;
+      --ink-2: #5A6069;
+      --ink-3: #8B9199;
+      --line: #E2E4E8;
+      --line-strong: #CBCFD4;
+      --bg: #FFFFFF;
+      --bg-soft: #F6F7F9;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --radius-sm: 8px;
+      --shadow-card: 0 2px 28px rgba(15, 23, 33, 0.07);
+      --shadow-focus: 0 0 0 3px rgba(27, 58, 92, 0.14);
+      --transition: 0.16s ease;
+      --font-display: "Fraunces", Georgia, serif;
+      --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--ink);
+      background: var(--bg-soft);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ---------- Full-screen split layout ---------- */
+    .shell {
+      display: grid;
+      grid-template-columns: minmax(380px, 42%) 1fr;
+      min-height: 100vh;
+    }
+
+    /* ---------- Left brand panel ---------- */
+    .panel {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 48px 56px;
+      background: linear-gradient(160deg, var(--brand) 0%, var(--brand-dark) 60%, #0A1826 100%);
+      color: #FFFFFF;
+      overflow: hidden;
+    }
+    .panel::before {
+      content: "";
+      position: absolute;
+      top: -140px;
+      right: -140px;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      pointer-events: none;
+    }
+    .panel::after {
+      content: "";
+      position: absolute;
+      bottom: -180px;
+      left: -100px;
+      width: 360px;
+      height: 360px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.06);
+      pointer-events: none;
+    }
+
+    .panel-logo {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: #FFFFFF;
+      font-weight: 800;
+      font-size: 24px;
+      letter-spacing: -0.4px;
+      text-decoration: none;
+    }
+    .panel-logo svg {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+    }
+
+    .panel-body {
+      position: relative;
+      z-index: 1;
+      max-width: 440px;
+    }
+    .panel-body h2 {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 3vw, 38px);
+      font-weight: 600;
+      letter-spacing: -0.4px;
+      line-height: 1.2;
+      margin-bottom: 18px;
+    }
+    .panel-body p {
+      font-size: 16px;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.85);
+      margin-bottom: 32px;
+    }
+
+    .panel-list {
+      list-style: none;
+      display: grid;
+      gap: 14px;
+    }
+    .panel-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 14.5px;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.92);
+    }
+    .panel-list .check {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.18);
+      display: grid;
+      place-items: center;
+      margin-top: 1px;
+    }
+    .panel-list .check svg {
+      width: 12px;
+      height: 12px;
+      stroke: #FFFFFF;
+      stroke-width: 2.5;
+      fill: none;
+    }
+
+    .panel-footer {
+      position: relative;
+      z-index: 1;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* ---------- Right form area ---------- */
+    .form-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 56px 48px;
+      background: var(--bg-soft);
+      overflow-y: auto;
+    }
+
+    .form-card {
+      width: 100%;
+      max-width: 560px;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 44px 48px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .form-head {
+      margin-bottom: 30px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--line);
+    }
+    .form-head h1 {
+      font-family: var(--font-display);
+      font-size: 27px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    .form-head p {
+      color: var(--ink-2);
+      font-size: 14.5px;
+      line-height: 1.55;
+    }
+
+    /* ---------- Form grid ---------- */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .form-field {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: 0.1px;
+      line-height: 1.4;
+    }
+    .field-label small {
+      font-weight: 400;
+      color: var(--ink-2);
+      font-size: 12.5px;
+      margin-left: 2px;
+    }
+
+    /* ---------- Inputs ---------- */
+    input[type=text],
+    input[type=email],
+    input[type=password],
+    input[type=number] {
+      width: 100%;
+      height: 46px;
+      padding: 0 15px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-sm);
+      font: inherit;
+      font-size: 15px;
+      color: var(--ink);
+      background: var(--bg);
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    input::placeholder { color: var(--ink-3); }
+    input:hover { border-color: #B8B8B8; }
+    input:focus {
+      outline: none;
+      border-color: var(--brand);
+      box-shadow: var(--shadow-focus);
+    }
+
+    /* ---------- Role cards ---------- */
+    .roles {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 2px;
+    }
+    .role {
+      display: grid;
+      grid-template-columns: 20px 1fr;
+      column-gap: 14px;
+      align-items: start;
+      padding: 15px 18px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      background: var(--bg);
+      transition: border-color var(--transition), background var(--transition);
+      user-select: none;
+    }
+    .role:hover {
+      border-color: #B8B8B8;
+      background: #FAFAFA;
+    }
+    .role.on {
+      border-color: var(--brand);
+      background: var(--brand-soft);
+    }
+
+    .role input[type=radio] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 1.5px solid var(--line-strong);
+      border-radius: 50%;
+      margin-top: 2px;
+      flex-shrink: 0;
+      position: relative;
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .role input[type=radio]:checked {
+      border-color: var(--brand);
+      background: var(--brand);
+    }
+    .role input[type=radio]:checked::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 7px;
+      height: 7px;
+      background: #fff;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .role-text { display: block; min-width: 0; }
+    .role-text .t {
+      display: block;
+      font-weight: 600;
+      font-size: 14.5px;
+      line-height: 1.35;
+      color: var(--ink);
+      margin-bottom: 2px;
+    }
+    .role-text .d {
+      display: block;
+      color: var(--ink-2);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    /* ---------- Conditional field ---------- */
+    #propCount {
+      display: none;
+      margin-top: -4px;
+    }
+    #propCount.visible {
+      display: block;
+      animation: fadeIn 0.22s ease both;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ---------- Submit button ---------- */
+    button.primary {
+      width: 100%;
+      height: 50px;
+      padding: 0 20px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: var(--brand);
+      color: #FFFFFF;
+      font-weight: 600;
+      font-size: 15.5px;
+      letter-spacing: 0.2px;
+      cursor: pointer;
+      transition: background var(--transition), box-shadow var(--transition);
+    }
+    button.primary:hover:not(:disabled) {
+      background: var(--brand-dark);
+      box-shadow: 0 6px 18px rgba(27, 58, 92, 0.25);
+    }
+    button.primary:active:not(:disabled) { box-shadow: none; }
+    button.primary:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    /* ---------- Status ---------- */
+    .status {
+      min-height: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.5;
+      text-align: left;
+      padding-top: 2px;
+    }
+    .status.bad { color: #B3261E; }
+    .status.ok  { color: #1F7A4D; }
+
+    /* ---------- Footer ---------- */
+    .foot {
+      text-align: center;
+      margin-top: 26px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+      font-size: 14px;
+      color: var(--ink-2);
+    }
+    .foot a {
+      color: var(--brand);
+      font-weight: 600;
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+    .foot a:hover {
+      color: var(--brand-dark);
+      text-decoration: underline;
+    }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 960px) {
+      .shell { grid-template-columns: 1fr; }
+      .panel {
+        padding: 36px 32px;
+        min-height: auto;
+      }
+      .panel-body { max-width: 100%; margin: 24px 0; }
+      .panel-list { display: none; }
+      .panel-footer { display: none; }
+      .form-area { padding: 32px 20px 48px; }
+      .form-card { padding: 32px 28px; }
+    }
+
+    @media (max-width: 480px) {
+      .panel { padding: 24px 20px; }
+      .panel-body h2 { font-size: 24px; }
+      .panel-body p { font-size: 14.5px; margin-bottom: 0; }
+      .form-area { padding: 24px 12px 40px; }
+      .form-card { padding: 26px 20px; border-radius: 16px; }
+      .form-head h1 { font-size: 22px; }
+      .role { padding: 13px 15px; }
+      .role-text .t { font-size: 14px; }
+      .role-text .d { font-size: 12.5px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="shell">
+
+    <!-- ---------- Left brand panel ---------- -->
+    <aside class="panel">
+      <a class="panel-logo" href="/portal" aria-label="Staybot home">
+        <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+          <path d="M16 2.5c.9 0 1.7.5 2.2 1.3l11 19.1c1.6 2.8-.4 6.3-3.6 6.3-1.4 0-2.7-.7-3.5-1.8L16 20.2l-6.1 7.2c-.8 1.1-2.1 1.8-3.5 1.8-3.2 0-5.2-3.5-3.6-6.3l11-19.1c.5-.8 1.3-1.3 2.2-1.3zm0 4.4L6.1 24.2c-.4.7.1 1.6.9 1.6.4 0 .7-.2.9-.4L16 15.8l8.1 9.6c.2.3.5.4.9.4.8 0 1.3-.9.9-1.6L16 6.9z"/>
+        </svg>
+        staybot
+      </a>
+
+      <div class="panel-body">
+        <h2>Find, rent, and invest with an AI that knows real estate.</h2>
+        <p>Staybot guides every step — from your first search to managing a growing portfolio — with tools built for the way you work.</p>
+
+        <ul class="panel-list">
+          <li>
+            <span class="check">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            <span>Personalised property matches in seconds.</span>
+          </li>
+          <li>
+            <span class="check">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            <span>Guided investing from first deal to full portfolio.</span>
+          </li>
+          <li>
+            <span class="check">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            <span>Smart insights on every property you consider.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="panel-footer">
+        © 2025 Staybot. All rights reserved.
+      </div>
+    </aside>
+
+    <!-- ---------- Right form area ---------- -->
+    <main class="form-area">
+      <div class="form-card">
+
+        <div class="form-head">
+          <h1>Create your account</h1>
+          <p>Pick the workflow that fits you — each one is guided by the AI from here on.</p>
+        </div>
+
+        <form id="form" novalidate>
+          <div class="form-grid">
+
+            <!-- Role selection -->
+            <div class="form-field">
+              <label class="field-label">Which best describes you?</label>
+              <div class="roles" id="roles">
+                <label class="role" data-role="tenant">
+                  <input type="radio" name="role" value="tenant">
+                  <span class="role-text">
+                    <span class="t">Tenant</span>
+                    <span class="d">Looking to rent or buy a home.</span>
+                  </span>
+                </label>
+                <label class="role" data-role="new_investor">
+                  <input type="radio" name="role" value="new_investor">
+                  <span class="role-text">
+                    <span class="t">New Property Investor</span>
+                    <span class="d">First real-estate investment — I'll walk you through it, including the basics.</span>
+                  </span>
+                </label>
+                <label class="role" data-role="existing_investor">
+                  <input type="radio" name="role" value="existing_investor">
+                  <span class="role-text">
+                    <span class="t">Existing Property Investor</span>
+                    <span class="d">I already own investment property and want to grow or manage my portfolio.</span>
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Conditional property count -->
+            <div id="propCount">
+              <div class="form-field">
+                <label class="field-label" for="count">How many investment properties do you already own?</label>
+                <input type="number" id="count" min="1" max="1000" placeholder="e.g. 2">
+              </div>
+            </div>
+
+            <!-- Full name -->
+            <div class="form-field">
+              <label class="field-label" for="name">Full name</label>
+              <input type="text" id="name" autocomplete="name" maxlength="120" placeholder="Jane Smith" required>
+            </div>
+
+            <!-- Email -->
+            <div class="form-field">
+              <label class="field-label" for="email">Email</label>
+              <input type="email" id="email" autocomplete="email" maxlength="200" placeholder="you@example.com" required>
+            </div>
+
+            <!-- Password -->
+            <div class="form-field">
+              <label class="field-label" for="password">Password <small>(8+ characters)</small></label>
+              <input type="password" id="password" autocomplete="new-password" minlength="8" maxlength="200" placeholder="••••••••" required>
+            </div>
+
+            <!-- Submit -->
+            <div>
+              <button class="primary" id="submit" type="submit">Create account</button>
+            </div>
+
+            <!-- Status -->
+            <div class="status" id="status" role="status" aria-live="polite"></div>
+
+          </div>
+        </form>
+
+        <div class="foot">Already have an account? <a href="/login">Log in</a></div>
+        <div class="foot">By creating an account you agree to our <a href="/privacy" target="_blank" rel="noopener">privacy policy</a>.</div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const roles = $("roles");
+    const propCount = $("propCount");
+
+    // Role selection
+    roles.querySelectorAll(".role").forEach((el) => {
+      el.addEventListener("click", () => {
+        roles.querySelectorAll(".role").forEach((r) => r.classList.remove("on"));
+        el.classList.add("on");
+        el.querySelector("input").checked = true;
+
+        const isExisting = el.dataset.role === "existing_investor";
+        propCount.classList.toggle("visible", isExisting);
+        if (!isExisting) $("count").value = "";
+      });
+    });
+
+    // Status helper
+    function say(text, tone) {
+      const s = $("status");
+      s.textContent = text || "";
+      s.className = "status " + (tone || "");
+    }
+
+    // Form submission
+    $("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const role = (document.querySelector('input[name=role]:checked') || {}).value;
+      if (!role) { say("Choose which best describes you.", "bad"); return; }
+
+      const name = $("name").value.trim();
+      const email = $("email").value.trim();
+      const password = $("password").value;
+      const count = $("count").value;
+
+      if (!name) { say("Please enter your full name.", "bad"); $("name").focus(); return; }
+      if (!email) { say("Please enter your email address.", "bad"); $("email").focus(); return; }
+      if (!password || password.length < 8) { say("Password must be at least 8 characters.", "bad"); $("password").focus(); return; }
+      if (role === "existing_investor" && !count) { say("Enter how many properties you already own.", "bad"); $("count").focus(); return; }
+
+      const btn = $("submit");
+      btn.disabled = true;
+      say("Creating your account…");
+
+      const body = { name, email, password, role };
+      if (role === "existing_investor") body.existing_property_count = parseInt(count, 10);
+
+      try {
+        const res = await fetch("/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok) throw new Error((data && data.detail) || `Request failed (${res.status}).`);
+        say("Account created — taking you in…", "ok");
+        location.href = data.redirect_url || "/ui";
+      } catch (err) {
+        say(err.message, "bad");
+        btn.disabled = false;
+      }
+    });
+
+    // Same back-forward-cache fix as login.html: if someone clicks Back
+    // after successfully registering, don't leave the submit button
+    // stuck disabled from right before we navigated away.
+    window.addEventListener("pageshow", (event) => {
+      if (event.persisted) {
+        $("submit").disabled = false;
+        say("");
+      }
+    });
+  </script>
+  <script src="/assets/property-scene.js" defer></script>
+</body>
+</html>

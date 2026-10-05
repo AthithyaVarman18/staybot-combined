@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<title>Staybot · Your property</title>
+<style>
+  :root { --grad:linear-gradient(to right,#E61E4D 0%,#E31C5F 50%,#D70466 100%); --ink:#222; --ink-2:#6A6A6A; --line:#DDD; --ok:#008A05; --bad:#C13515; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif; color:var(--ink); background:#fff; font-size:16px; line-height:1.5; }
+  header { padding:14px 20px; border-bottom:1px solid #EBEBEB; }
+  .logo { color:#FF385C; font-weight:800; font-size:20px; letter-spacing:-.4px; }
+  .wrap { max-width:560px; margin:0 auto; padding:24px 16px 80px; }
+  h1 { font-size:26px; line-height:1.2; margin:0 0 10px; letter-spacing:-.3px; }
+  .home { border:1px solid var(--line); border-radius:16px; padding:16px; margin:16px 0; }
+  .home b { display:block; font-size:18px; }
+  .muted { color:var(--ink-2); } .small { font-size:14px; }
+  .choice { display:flex; flex-direction:column; gap:10px; margin-top:18px; }
+  .btn { display:flex; align-items:center; justify-content:center; min-height:52px; padding:12px 20px; border-radius:26px; border:1px solid var(--line); background:#fff; font:inherit; font-weight:600; color:var(--ink); text-decoration:none; cursor:pointer; width:100%; }
+  .btn.primary { border:0; color:#fff; background:var(--grad); }
+  .btn.dark { border:0; color:#fff; background:var(--ink); }
+  .btn.wa { border:0; color:#fff; background:#1FA855; }
+  .btn:disabled { opacity:.5; }
+  label { display:flex; flex-direction:column; gap:6px; font-weight:600; margin-top:14px; }
+  input { font:inherit; padding:12px; border:1px solid var(--line); border-radius:12px; min-height:48px; }
+  .status { margin-top:12px; font-weight:600; min-height:22px; }
+  .status.bad { color:var(--bad); }
+  .good { border-radius:14px; padding:14px; background:#EEF8EF; border:1px solid #BFE3C3; margin-top:14px; }
+  .error { border-radius:16px; padding:20px; background:#FFF1EE; border:1px solid #F3C4B8; }
+  a.link { color:var(--ink-2); font-size:14px; }
+</style>
+</head>
+<body>
+<header><span class="logo">staybot</span></header>
+<main class="wrap" id="app" aria-live="polite"><p class="muted">Loading…</p></main>
+<script>
+(function () {
+  "use strict";
+  const token = location.pathname.split("/")[2] || "";
+  const api = `/o/${encodeURIComponent(token)}/api`;
+  const app = document.getElementById("app");
+  const E = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+  const wanted = new URLSearchParams(location.search).get("choice");
+  let S = null;
+
+  async function call(method, body) {
+    const res = await fetch(api, { method, headers: body ? { "Content-Type": "application/json" } : {}, body: body ? JSON.stringify(body) : undefined });
+    let data = null; try { data = await res.json(); } catch (e) { /* ignore */ }
+    if (!res.ok) throw new Error((data && typeof data.detail === "string") ? data.detail : "Something went wrong. Please try again.");
+    return data;
+  }
+
+  function homeCard() {
+    const h = E("div", "home");
+    h.append(E("span", "muted small", "Your property"), E("b", null, S.home), E("span", "muted small", [S.area, S.price].filter(Boolean).join(" · ")));
+    return h;
+  }
+
+  function render(message) {
+    app.replaceChildren();
+    if (S.response === "whatsapp" || S.response === "email") {
+      app.append(E("h1", null, `Thank you, ${S.first_name}!`), homeCard());
+      app.append(E("div", "good", S.response === "whatsapp"
+        ? "We'll help you with your property. Tap below to start chatting with us on WhatsApp. Our assistant can answer questions straight away."
+        : "We'll email you shortly with next steps."));
+      if (S.whatsapp_link) { const wa = E("a", "btn wa", "Chat with us on WhatsApp"); wa.href = S.whatsapp_link; wa.rel = "noopener"; wa.style.marginTop = "14px"; app.append(wa); }
+      else if (S.response === "whatsapp") app.append(E("p", "muted small", "Our team will message you on WhatsApp soon."));
+      return;
+    }
+    if (S.response === "not_interested") {
+      app.append(E("h1", null, "No problem"), E("p", null, `Thanks for letting us know, ${S.first_name}. We won't follow up about this property.`));
+      return;
+    }
+    app.append(E("h1", null, `Hi ${S.first_name}, can we help?`), E("p", "muted", `${S.business} helps owners ${S.listing_type === "sale" ? "sell" : "rent out"} their homes faster, with verified ${S.listing_type === "sale" ? "buyers" : "tenants"}, viewings handled and paperwork done.`), homeCard());
+    const out = E("div", "status"); out.setAttribute("role", "status");
+    const phoneLabel = E("label"); const phone = E("input"); phone.type = "tel"; phone.autocomplete = "tel"; phone.placeholder = S.phone_hint ? `Leave empty to use ${S.phone_hint}` : "+91 98765 43210";
+    phoneLabel.append(E("span", null, "Your WhatsApp number"), phone);
+    const choice = E("div", "choice");
+    const yesWa = E("button", "btn primary", "Yes, contact me on WhatsApp"); yesWa.type = "button";
+    const yesEmail = E("button", "btn dark", "Yes, email me"); yesEmail.type = "button";
+    const no = E("button", "btn", "No thanks"); no.type = "button";
+    const send = async (value, btn) => {
+      btn.disabled = true; out.textContent = ""; out.className = "status";
+      try { S = await call("POST", { choice: value, whatsapp_number: value === "whatsapp" ? phone.value : "" }); render(); }
+      catch (err) { out.textContent = err.message; out.className = "status bad"; btn.disabled = false; }
+    };
+    yesWa.onclick = () => send("whatsapp", yesWa);
+    yesEmail.onclick = () => send("email", yesEmail);
+    no.onclick = () => send("not_interested", no);
+    app.append(phoneLabel, choice); choice.append(yesWa, yesEmail, no);
+    app.append(out);
+    const unsub = E("a", "link", "Unsubscribe from all messages"); unsub.href = `/o/${encodeURIComponent(token)}/unsubscribe`;
+    const p = E("p"); p.style.marginTop = "28px"; p.append(unsub); app.append(p);
+    if (wanted === "whatsapp") phone.focus();
+    if (message) out.textContent = message;
+  }
+
+  call("GET").then((data) => { S = data; render(); if (wanted === "not_interested") document.querySelector(".choice .btn:last-child").focus(); })
+    .catch((err) => { app.replaceChildren(); const box = E("div", "error"); box.append(E("h1", null, "Link not valid"), E("p", null, err.message)); app.append(box); });
+})();
+</script>
+</body>
+</html>

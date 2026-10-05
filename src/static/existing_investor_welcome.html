@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script src="/assets/tab-session.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Welcome, Existing Property Investor · Staybot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #1B3A5C; --brand-dark: #12283F; --brand-soft: #EAF0F6; --accent: #B8873C; --accent-soft: #FDF3E1;
+    --ink: #15191E; --ink-2: #5A6069;
+    --line: #E2E4E8; --line-soft: #EDEFF1;
+    --bg: #FFFFFF; --bg-soft: #F6F7F9;
+    --pos: #1F7A4D; --pos-soft: #E8F5EE;
+    --font-display: "Fraunces", Georgia, serif;
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: var(--font-sans);
+    color: var(--ink); background: var(--bg-soft); min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; padding: 40px 16px 48px;
+  }
+  .logo { display: flex; align-items: center; gap: 8px; color: var(--brand); font-weight: 700; font-size: 22px; text-decoration: none; margin-bottom: 20px; }
+  .logo svg { width: 28px; height: 28px; }
+  .wrap { width: 100%; max-width: 760px; }
+  #gate { text-align: center; color: var(--ink-2); padding: 60px 0; }
+
+  /* "You've been moved" notice */
+  .moved {
+    display: flex; gap: 14px; align-items: flex-start;
+    background: var(--pos-soft); border: 1px solid #BFE3CF; border-radius: 14px; padding: 16px 18px; margin-bottom: 26px;
+  }
+  .moved .icon { font-size: 22px; line-height: 1; margin-top: 2px; }
+  .moved b { display: block; font-size: 15px; margin-bottom: 4px; color: #134E31; }
+  .moved p { margin: 0; color: #2C5A43; font-size: 14px; line-height: 1.55; }
+  .roles { display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .role { font-size: 12.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
+  .role.old { background: #fff; color: var(--ink-2); border: 1px solid var(--line); text-decoration: line-through; }
+  .role.new { background: var(--brand); color: #fff; }
+  .roles .arrow { color: var(--ink-2); }
+
+  h1 { font-family: var(--font-display); font-weight: 600; font-size: 30px; margin: 0 0 6px; text-align: center; }
+  p.sub { color: var(--ink-2); margin: 0 0 26px; font-size: 15px; text-align: center; line-height: 1.55; }
+
+  /* The home(s) they now own */
+  .homes { display: grid; gap: 10px; margin-bottom: 30px; }
+  .home {
+    display: flex; align-items: center; gap: 14px; background: #fff; border: 1px solid var(--line);
+    border-radius: 14px; padding: 14px 16px;
+  }
+  .home .thumb { width: 46px; height: 46px; border-radius: 10px; background: var(--brand-soft); display: grid; place-items: center; font-size: 22px; flex: none; }
+  .home .name { font-weight: 600; font-size: 15px; }
+  .home .meta { color: var(--ink-2); font-size: 13px; margin-top: 2px; }
+  .home .tag { margin-left: auto; font-size: 12px; font-weight: 600; color: var(--pos); background: var(--pos-soft); padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-2); margin: 0 0 12px; font-weight: 700; }
+
+  /* Main choices: rent it out / sell it */
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 30px; }
+  .choice {
+    text-align: left; background: #fff; border: 1.5px solid var(--line); border-radius: 16px; padding: 22px 20px;
+    cursor: pointer; font: inherit; color: inherit; display: flex; flex-direction: column; gap: 6px;
+    transition: border-color .15s, box-shadow .15s, transform .15s;
+  }
+  .choice:hover { border-color: var(--brand); box-shadow: 0 6px 20px rgba(27,58,92,.10); transform: translateY(-2px); }
+  .choice .big { font-size: 28px; line-height: 1; margin-bottom: 6px; }
+  .choice b { font-size: 17px; }
+  .choice span { color: var(--ink-2); font-size: 14px; line-height: 1.5; }
+  .choice .go { margin-top: 8px; color: var(--brand); font-weight: 600; font-size: 14px; }
+
+  /* Everything else in the dashboard */
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 30px; }
+  .feature {
+    text-align: left; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 16px;
+    cursor: pointer; font: inherit; color: inherit; transition: border-color .15s;
+  }
+  .feature:hover { border-color: var(--brand); }
+  .feature .ic { font-size: 20px; }
+  .feature b { display: block; font-size: 14.5px; margin: 8px 0 4px; }
+  .feature span { color: var(--ink-2); font-size: 13px; line-height: 1.45; }
+
+  button.primary {
+    width: 100%; padding: 15px; border: none; border-radius: 12px; background: var(--brand);
+    color: #fff; font-weight: 700; font-size: 15.5px; cursor: pointer; font-family: var(--font-sans);
+  }
+  button.primary:hover:not(:disabled) { background: var(--brand-dark); }
+  button.primary:disabled { background: #9FB0C2; cursor: default; }
+  button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .status { min-height: 20px; margin-top: 12px; font-size: 13.5px; text-align: center; color: var(--ink-2); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .wrap.enter { animation: enter .4s ease-out; }
+    @keyframes enter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  }
+  @media (max-width: 640px) {
+    body { padding-top: 64px; }
+    h1 { font-size: 24px; }
+    .choices { grid-template-columns: 1fr; }
+    .features { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 400px) { .features { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<!-- Log out - every user (shared helper in /assets/tab-session.js). -->
+<style>
+  .sb-logout { position: fixed; top: 18px; right: 20px; z-index: 50; display: inline-flex; align-items: center; gap: 7px;
+    border: 1px solid #DDDDDD; background: #fff; color: #222; border-radius: 999px; padding: 8px 14px 8px 12px;
+    font: 600 13.5px/1 inherit; font-family: inherit; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+  .sb-logout:hover { border-color: #222; }
+  .sb-logout:focus-visible { outline: 2px solid #1B3A5C; outline-offset: 2px; }
+  .sb-logout:disabled { opacity: .6; cursor: default; }
+  @media (max-width: 560px) { .sb-logout { top: 12px; right: 12px; padding: 7px 11px; } }
+</style>
+<button class="sb-logout" id="sb-logout" type="button">
+  <svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><path d="M8 4H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3M13 14l4-4-4-4M17 10H8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  Log out
+</button>
+<script>
+  document.getElementById("sb-logout").addEventListener("click", async function () {
+    this.disabled = true;
+    if (window.staybotLogout) await window.staybotLogout("/login");
+    else { try { await fetch("/auth/logout", { method: "POST" }); } catch (e) { /* leave anyway */ } location.href = "/login"; }
+  });
+</script>
+
+<a class="logo" href="/ui">
+  <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+    <path d="M16 2.5c.9 0 1.7.5 2.2 1.3l11 19.1c1.6 2.8-.4 6.3-3.6 6.3-1.4 0-2.7-.7-3.5-1.8L16 20.2l-6.1 7.2c-.8 1.1-2.1 1.8-3.5 1.8-3.2 0-5.2-3.5-3.6-6.3l11-19.1c.5-.8 1.3-1.3 2.2-1.3zm0 4.4L6.1 24.2c-.4.7.1 1.6.9 1.6.4 0 .7-.2.9-.4L16 15.8l8.1 9.6c.2.3.5.4.9.4.8 0 1.3-.9.9-1.6L16 6.9z"/>
+  </svg>
+  staybot
+</a>
+
+<div id="gate">Loading…</div>
+
+<div class="wrap" id="app" hidden>
+  <div class="moved" role="status">
+    <div class="icon">🎉</div>
+    <div>
+      <b id="moved-title">You've been moved to Existing Property Investor</b>
+      <p id="moved-text">You now own a property, so your account has been upgraded. Your dashboard now has the tools for managing and growing what you own.</p>
+      <div class="roles"><span class="role old">New Property Investor</span><span class="arrow">→</span><span class="role new">Existing Property Investor</span></div>
+    </div>
+  </div>
+
+  <h1 id="hello">Congratulations on your property!</h1>
+  <p class="sub">Here's what you can do now. Pick where to start, or go straight to your dashboard. You won't see this page again.</p>
+
+  <div id="homes-wrap" hidden>
+    <h2>Your property</h2>
+    <div class="homes" id="homes"></div>
+  </div>
+
+  <h2>What would you like to do with it?</h2>
+  <div class="choices">
+    <button class="choice" type="button" data-go="mylistings">
+      <div class="big">🏡</div>
+      <b>Rent it out</b>
+      <span>List it for rent. Tenants see it straight away, our team screens them, and you approve who moves in.</span>
+      <span class="go">List for rent →</span>
+    </button>
+    <button class="choice" type="button" data-go="mylistings">
+      <div class="big">🏷️</div>
+      <b>Sell it</b>
+      <span>List it for sale. Investors and buyers see it, send you their details, and you agree the price with purchase offers.</span>
+      <span class="go">List for sale →</span>
+    </button>
+  </div>
+
+  <h2>Everything else in your new dashboard</h2>
+  <div class="features">
+    <button class="feature" type="button" data-go="mytenants"><div class="ic">👥</div><b>Tenants &amp; buyers</b><span>Approve applications, send offers and handle your tenants' maintenance requests.</span></button>
+    <button class="feature" type="button" data-go="portfolio"><div class="ic">📊</div><b>Portfolio</b><span>Value, equity, rent and cash flow for every home you own.</span></button>
+    <button class="feature" type="button" data-go="investing"><div class="ic">📈</div><b>Grow your portfolio</b><span>Deals matched to what you already own, with the full numbers.</span></button>
+    <button class="feature" type="button" data-go="myalerts"><div class="ic">🔔</div><b>Alerts</b><span>Lease ends, rent changes and anything that needs your attention.</span></button>
+    <button class="feature" type="button" data-go="offers"><div class="ic">📝</div><b>Offers &amp; inspections</b><span>Track purchase offers and book property inspections.</span></button>
+    <button class="feature" type="button" data-go="chat"><div class="ic">💬</div><b>AI assistant</b><span>Ask anything about your homes. Just say "rent out my house for $1,800".</span></button>
+  </div>
+
+  <button class="primary" id="continueBtn" type="button">Go to my dashboard</button>
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const money = (v) => v == null || v === "" ? "" : "$" + Number(v).toLocaleString(undefined, { maximumFractionDigits: 0 });
+
+  async function api(method, url) {
+    const res = await fetch(url, { method, credentials: "same-origin" });
+    let data = null; try { data = await res.json(); } catch (e) { /* not JSON */ }
+    if (!res.ok) throw new Error((data && data.detail) || `Request failed (${res.status}).`);
+    return data;
+  }
+
+  // Mark the welcome as seen, then open the dashboard on the chosen tab.
+  // If marking it fails, still let them through - /ui would just send them
+  // back here once more, which is better than being stuck.
+  let leaving = false;
+  async function go(view) {
+    if (leaving) return;
+    leaving = true;
+    document.querySelectorAll("button").forEach((b) => { b.disabled = true; });
+    $("status").textContent = "Opening your dashboard…";
+    try { await api("POST", "/auth/existing-welcome-complete"); } catch (e) { /* see above */ }
+    location.href = "/ui" + (view ? "#" + view : "");
+  }
+
+  function renderHomes(homes, owned) {
+    if (!homes.length) return;
+    $("homes").innerHTML = homes.map((h) => {
+      const meta = [h.property_type, h.bedrooms != null ? `${h.bedrooms} bed` : "",
+        h.estimated_value || h.purchase_price ? `worth ${money(h.estimated_value || h.purchase_price)}` : ""].filter(Boolean).join(" · ");
+      return `<div class="home"><div class="thumb">🏠</div>
+        <div><div class="name">${esc(h.address || "Your home")}</div>${meta ? `<div class="meta">${esc(meta)}</div>` : ""}</div>
+        <span class="tag">You own this</span></div>`;
+    }).join("");
+    if (owned > homes.length) $("homes").insertAdjacentHTML("beforeend", `<div class="status" style="margin:0;text-align:left">+ ${owned - homes.length} more in your Portfolio</div>`);
+    $("homes-wrap").hidden = false;
+  }
+
+  async function init() {
+    let data;
+    try {
+      data = await api("GET", "/auth/existing-welcome");
+    } catch (err) {
+      location.href = "/login";
+      return;
+    }
+    const account = data.account || {};
+    // Only shown once, to an account that was just moved over.
+    if (!account.existing_welcome_pending) { location.href = "/ui"; return; }
+
+    const first = (account.name || "").split(" ")[0];
+    const home = (data.homes || [])[0];
+    $("hello").textContent = first ? `Congratulations, ${first}!` : "Congratulations on your property!";
+    $("moved-text").textContent = home && home.address
+      ? `You now own ${home.address}, so your account has been moved from New Property Investor to Existing Property Investor. Your dashboard now has the tools for managing and growing what you own.`
+      : "You now own a property, so your account has been moved from New Property Investor to Existing Property Investor. Your dashboard now has the tools for managing and growing what you own.";
+    renderHomes(data.homes || [], data.owned_count || 0);
+
+    $("gate").hidden = true;
+    $("app").hidden = false;
+    $("app").classList.add("enter");
+  }
+
+  document.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => go(b.dataset.go)));
+  $("continueBtn").addEventListener("click", () => go(""));
+
+  init();
+</script>
+</body>
+</html>

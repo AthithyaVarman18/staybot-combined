@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en"><head><script src="/assets/tab-session.js"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Purchase offers · Staybot</title>
+<style>
+:root{--ink:#17202a;--muted:#65717e;--line:#dfe4ea;--soft:#f6f8fa;--brand:#1b3a5c;--ok:#126b46;--warn:#8b5e00;--bad:#9b2c2c}*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;color:var(--ink);background:#fff}header{position:sticky;top:0;z-index:5;padding:16px 22px;border-bottom:1px solid var(--line);background:#fff;display:flex;justify-content:space-between;align-items:center;gap:12px}header a{color:var(--brand);text-decoration:none;font-weight:700}.wrap{max-width:1200px;margin:0 auto;padding:24px}.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.card{border:1px solid var(--line);border-radius:12px;padding:18px;background:#fff}.card h2{margin:0 0 5px;font-size:17px}.muted{color:var(--muted)}.small{font-size:12px}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.field{display:flex;flex-direction:column;gap:5px;margin:9px 0}.field label{font-size:12px;font-weight:700;color:var(--muted)}input,select,textarea{font:inherit;border:1px solid #cfd6de;border-radius:8px;padding:9px 10px;width:100%;background:#fff}textarea{min-height:80px;resize:vertical}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.btn{border:1px solid #c8d0d8;background:#fff;color:var(--ink);border-radius:8px;padding:9px 12px;font-weight:700;cursor:pointer}.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}.btn.ok{background:#eaf7f1;border-color:#b8dfce;color:var(--ok)}.btn.bad{background:#fff0f0;border-color:#e9c5c5;color:var(--bad)}.btn:disabled{opacity:.55;cursor:not-allowed}.status{padding:3px 8px;border-radius:20px;background:var(--soft);font-size:12px;font-weight:700}.status.green{background:#eaf7f1;color:var(--ok)}.status.warn{background:#fff7df;color:var(--warn)}.status.red{background:#fff0f0;color:var(--bad)}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top;font-size:13px}th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}tr.click{cursor:pointer}.banner{padding:10px 12px;border-radius:8px;background:var(--soft);margin:10px 0}.timeline{display:grid;gap:10px;margin-top:10px}.event{border-left:3px solid #cdd5de;padding:8px 0 8px 12px}.event strong{display:block}.kvs{display:grid;grid-template-columns:160px 1fr;gap:7px 10px;font-size:13px}.kvs div:nth-child(odd){color:var(--muted);font-weight:700}.notice{padding:10px 12px;background:#fff7df;border:1px solid #efd58e;border-radius:8px;font-size:12px}.hidden{display:none}@media(max-width:850px){.grid{grid-template-columns:1fr}.three,.two{grid-template-columns:1fr}}
+</style><script>/* Embedded in the /ui "Purchase offers" / "Inspections" tab: drop this page's own header (the /ui sidebar already navigates). */if(window.self!==window.top)document.documentElement.classList.add("embedded");</script><style>html.embedded header{display:none}html.embedded .wrap{padding-top:8px}</style></head><body>
+<header><div><a href="/ui">Staybot</a> <span class="muted">/ Purchase offers</span></div><div class="row"><a href="/inspections">Inspection assistance</a><a href="/ui">Back to team</a></div></header>
+<div class="wrap"><div class="notice"><b>Boundary:</b> Staybot collects offer terms and records the workflow. It does not create or sign a North Carolina purchase contract. The broker/attorney's approved contract platform remains the contract source of truth.</div>
+<div class="grid" style="margin-top:18px"><section class="card"><h2>Create offer</h2><p class="muted small">Enter the terms supplied by the investor/client. The app does not recommend a price or terms.</p>
+<div class="two"><div class="field"><label>Sale property</label><select id="property"></select></div><div class="field"><label>Investment deal (optional)</label><select id="deal"><option value="">No linked deal</option></select></div></div>
+<div class="field"><label>Investor</label><select id="investor"></select></div>
+<div class="two"><div class="field"><label>Offer price (USD)</label><input id="price" type="number" min="0.01" step="0.01"></div><div class="field"><label>Earnest money (USD)</label><input id="earnest" type="number" min="0" step="0.01"></div></div>
+<div class="three"><div class="field"><label>Due diligence fee (USD)</label><input id="ddfee" type="number" min="0" step="0.01"></div><div class="field"><label>Due diligence period (days)</label><input id="ddperiod" type="number" min="0" step="1"></div><div class="field"><label>Due diligence end</label><input id="ddend" type="date"></div></div>
+<div class="two"><div class="field"><label>Financing deadline (optional)</label><input id="finance_deadline" type="date"></div><div class="field"><label>Closing date</label><input id="closing" type="date"></div></div><div class="field"><label>Closing time (optional)</label><input id="closing_time" type="time"><span class="muted small">Used for hour-based closing alerts when supplied.</span></div>
+<div class="field"><label>Offer expires</label><input id="expires" type="datetime-local"></div>
+<div class="field"><label>Financing contingency</label><textarea id="finance" placeholder="Enter the investor's supplied financing contingency / notes."></textarea></div>
+<div class="field"><label>What is included</label><textarea id="included" placeholder="Enter only what the investor supplied."></textarea></div>
+<div class="row"><button class="btn primary" id="create">Create draft offer</button><span id="create-msg" class="muted small"></span></div></section>
+<section class="card"><h2>Offers</h2><p class="muted small">Select an offer to see versions, approvals, handoff, deadlines and the negotiation timeline.</p><div id="list">Loading…</div></section></div>
+<section class="card hidden" id="detail" style="margin-top:18px"><div class="row" style="justify-content:space-between"><div><h2 id="d-title">Offer</h2><p id="d-sub" class="muted small"></p></div><div class="row"><a id="d-pdf" class="btn" target="_blank">Current summary PDF</a><button class="btn" id="d-send">Send for investor approval</button></div></div>
+<div id="d-body" style="margin-top:14px"></div></section></div>
+<script>
+const $ = (id) => document.getElementById(id);
+const staff = () => { try { return localStorage.getItem('staybot.onboarding.actingStaff') || ''; } catch (e) { return ''; } };
+let options = null;
+let current = null;
+
+async function api(method, url, body, form) {
+  const headers = {'X-Staybot-Staff': staff()};
+  const opts = {method, headers};
+  if (form) {
+    opts.body = form;
+  } else if (body !== undefined) {
+    headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(body);
+  }
+  const response = await fetch(url, opts);
+  let data = null;
+  try { data = await response.json(); } catch (e) {}
+  if (!response.ok) throw new Error(data?.detail || `Request failed (${response.status})`);
+  return data;
+}
+
+function esc(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function money(value) {
+  return value == null || value === '' ? '—' : '$' + Number(value).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+
+function selectedInvestor() {
+  const id = $('investor').value;
+  return options.investors.find((x) => x.id === id) || {};
+}
+
+function renderDeadlineRows(deadlines) {
+  if (!deadlines.length) return '<div class="banner">No deadlines yet. Add dates to the offer terms.</div>';
+  return '<table><thead><tr><th>Deadline</th><th>Due</th><th>Reminder</th><th>Status</th></tr></thead><tbody>' +
+    deadlines.map((d) => '<tr><td>' + esc(d.label) + '</td><td>' + esc(d.due_at) + '</td><td>' + esc(d.remind_at) + '</td><td>' + esc(d.status) + '</td></tr>').join('') +
+    '</tbody></table>';
+}
+
+function renderNotifications(notifications) {
+  if (!notifications.length) return '<div class="banner">No staff alerts yet.</div>';
+  return '<div class="timeline">' + notifications.map((n) =>
+    '<div class="event"><strong>' + esc(n.kind) + '</strong><span class="small muted">' + esc(n.created_at) + '</span><div>' + esc(n.message) + '</div></div>'
+  ).join('') + '</div>';
+}
+
+function renderEvents(events) {
+  if (!events.length) return '<div class="banner">No negotiation events yet.</div>';
+  return '<div class="timeline">' + events.map((e) => {
+    const amount = e.amount ? ' · ' + money(e.amount) : '';
+    return '<div class="event"><strong>' + esc(e.event_type) + ' · ' + esc(e.actor_type) + amount +
+      '</strong><span class="small muted">' + esc(e.created_at) + '</span><div>' + esc(e.message || '') + '</div></div>';
+  }).join('') + '</div>';
+}
+
+function termsHtml(t) {
+  const rows = [
+    ['Offer price', money(t.price)],
+    ['Earnest money', money(t.earnest_money)],
+    ['Due diligence fee', money(t.due_diligence_fee)],
+    ['Due diligence period', t.due_diligence_period_days == null ? '—' : String(t.due_diligence_period_days) + ' days'],
+    ['Due diligence end', t.due_diligence_end || '—'],
+    ['Financing deadline', t.financing_deadline || '—'],
+    ['Closing date', t.closing_date || '—'],
+    ['Offer expires', t.expires_at || '—'],
+    ['Financing contingency', t.financing_contingency || '—'],
+    ['Included', t.included || '—'],
+  ];
+  return '<div class="kvs">' + rows.map((r) => '<div>' + esc(r[0]) + '</div><div>' + esc(r[1]) + '</div>').join('') + '</div>';
+}
+
+async function init() {
+  options = await api('GET', '/purchase-offers/options');
+  $('property').innerHTML = options.properties.map((x) =>
+    '<option value="' + esc(x.id) + '">' + esc(x.title) + ' — ' + esc(x.city || '') + ' ' + (x.sale_price ? money(x.sale_price) : '') + '</option>'
+  ).join('');
+  $('investor').innerHTML = '<option value="">Choose investor…</option>' + options.investors.map((x) =>
+    '<option value="' + esc(x.id) + '">' + esc(x.name) + (x.email ? ' — ' + esc(x.email) : '') + '</option>'
+  ).join('');
+  $('deal').innerHTML = '<option value="">No linked deal</option>' + options.deals.map((x) =>
+    '<option value="' + esc(x.id) + '">' + esc(x.label || x.id) + ' — ' + esc(x.status || '') + '</option>'
+  ).join('');
+  const queryDeal = new URLSearchParams(location.search).get('deal');
+  if (queryDeal && options.deals.some((x) => x.id === queryDeal)) $('deal').value = queryDeal;
+  await loadList();
+}
+
+async function loadList() {
+  const rows = await api('GET', '/purchase-offers');
+  if (!rows.length) {
+    $('list').innerHTML = '<div class="banner">No purchase offers yet.</div>';
+    return;
+  }
+  $('list').innerHTML = '<table><thead><tr><th>Reference</th><th>Property</th><th>Investor</th><th>Status</th><th>Version</th></tr></thead><tbody>' +
+    rows.map((x) => '<tr class="click" data-id="' + esc(x.id) + '"><td><b>' + esc(x.reference) + '</b></td><td>' + esc(x.property_title) + '</td><td>' + esc(x.investor_name) + '</td><td><span class="status">' + esc(x.status) + '</span></td><td>' + esc(x.current_version) + '</td></tr>').join('') +
+    '</tbody></table>';
+  $('list').querySelectorAll('tr[data-id]').forEach((row) => { row.onclick = () => openOffer(row.dataset.id); });
+}
+
+$('create').onclick = async () => {
+  try {
+    $('create').disabled = true;
+    $('create-msg').textContent = 'Creating…';
+    if (!$('property').value) throw new Error('Choose a sale property.');
+    if (!$('investor').value) throw new Error('Choose an investor.');
+    if (!$('closing').value) throw new Error('Closing date is required.');
+    if (!$('expires').value) throw new Error('Offer expiration is required.');
+    const investor = selectedInvestor();
+    const body = {
+      property_id: $('property').value,
+      deal_id: $('deal').value || null,
+      investor_id: $('investor').value || null,
+      investor_name: investor.name || '',
+      investor_email: investor.email || null,
+      investor_phone: investor.phone || null,
+      terms: {
+        price: $('price').value,
+        earnest_money: $('earnest').value || null,
+        due_diligence_fee: $('ddfee').value || null,
+        due_diligence_period_days: $('ddperiod').value || null,
+        due_diligence_end: $('ddend').value || null,
+        financing_deadline: $('finance_deadline').value || null,
+        closing_date: $('closing').value,
+        closing_time: $('closing_time').value || null,
+        expires_at: new Date($('expires').value).toISOString(),
+        financing_contingency: $('finance').value || null,
+        included: $('included').value || null,
+        currency: 'USD'
+      }
+    };
+    const result = await api('POST', '/purchase-offers', body);
+    $('create-msg').textContent = 'Draft created.';
+    $('create-msg').style.color = 'var(--ok)';
+    await loadList();
+    await openOffer(result.id);
+  } catch (e) {
+    $('create-msg').textContent = e.message;
+    $('create-msg').style.color = 'var(--bad)';
+  } finally {
+    $('create').disabled = false;
+  }
+};
+
+async function openOffer(id) {
+  current = await api('GET', '/purchase-offers/' + encodeURIComponent(id));
+  $('detail').classList.remove('hidden');
+  $('d-title').textContent = current.offer.reference;
+  $('d-sub').textContent = current.offer.property_title + ' · ' + current.offer.investor_name + ' · ' + current.offer.status;
+  $('d-pdf').href = '/purchase-offers/' + encodeURIComponent(id) + '/summary.pdf';
+  $('d-send').disabled = ['accepted','rejected','withdrawn','expired'].includes(current.offer.status);
+  renderDetail();
+  try {
+    window.parent.postMessage({
+      type: 'staybot-acquisition-offer-status',
+      offerId: current.offer.id,
+      status: current.offer.status,
+    }, window.location.origin);
+  } catch (e) { /* embedded workflow notification is best-effort */ }
+}
+
+function renderDetail() {
+  const version = current.versions[0];
+  const handoff = current.handoff;
+  const approvals = current.approvals || [];
+  let html = '<div class="grid">';
+  html += '<div class="card"><h3 style="margin-top:0">Current terms · v' + esc(version.version_number) + '</h3>';
+  html += termsHtml(version.terms);
+  html += '<div class="row" style="margin-top:12px"><button class="btn" id="edit-terms">Edit terms (creates new version)</button></div></div>';
+  html += '<div class="card"><h3 style="margin-top:0">Approval & broker handoff</h3>';
+  html += '<p><span class="status">' + esc(current.offer.status) + '</span></p>';
+  html += '<p class="small muted">Latest approval: ' + esc(approvals.length ? approvals[0].decision : 'none') + '</p>';
+  if (handoff) {
+    html += '<div class="kvs"><div>Platform</div><div>' + esc(handoff.platform) + '</div><div>Handoff status</div><div>' + esc(handoff.status) + '</div><div>Link</div><div>' +
+      (handoff.platform_link ? '<a href="' + esc(handoff.platform_link) + '" target="_blank" rel="noopener">Open platform link</a>' : '—') + '</div></div>';
+  }
+  html += '<div class="field"><label>Broker platform</label><select id="h-platform"><option value="unselected">Select platform…</option><option value="zipform">zipForm</option><option value="dotloop">Dotloop</option><option value="skyslope">SkySlope</option><option value="other">Other</option></select></div>';
+  html += '<div class="field"><label>Platform link</label><input id="h-link" placeholder="Paste the broker platform deal link"></div>';
+  html += '<div class="field"><label>Handoff status</label><select id="h-status"><option value="pending">pending</option><option value="handed_off">handed_off</option><option value="active">active</option><option value="completed">completed</option></select></div>';
+  html += '<button class="btn" id="save-handoff">Save handoff</button></div></div>';
+  html += '<div class="card" style="margin-top:14px"><h3 style="margin-top:0">Deadlines</h3>' + renderDeadlineRows(current.deadlines || []) + '</div>';
+  html += '<div class="card" style="margin-top:14px"><h3 style="margin-top:0">Staff alerts</h3>' + renderNotifications(current.notifications || []) + '</div>';
+  html += '<div class="card" style="margin-top:14px"><h3 style="margin-top:0">Negotiation timeline</h3>' + renderEvents(current.events || []) +
+    '<hr style="border:0;border-top:1px solid var(--line);margin:16px 0">' +
+    '<div class="three"><div class="field"><label>Action</label><select id="n-type"><option value="counter">Counter</option><option value="accepted">Accepted</option><option value="rejected">Rejected</option><option value="withdrawn">Withdrawn</option><option value="expired">Expired</option></select></div>' +
+    '<div class="field"><label>Who moved</label><select id="n-actor"><option value="buyer">Buyer</option><option value="seller">Seller</option><option value="broker">Broker</option><option value="staff">Staff</option></select></div>' +
+    '<div class="field"><label>Amount (leave blank to use current offer price)</label><input id="n-amount" type="number" step="0.01"></div></div>' +
+    '<div class="field"><label>Note</label><textarea id="n-note" placeholder="Record what happened; do not add legal language."></textarea></div>' +
+    '<button class="btn primary" id="record-event">Record negotiation event</button></div>';
+  $('d-body').innerHTML = html;
+
+  const selectedPlatform = (handoff && handoff.platform) || options?.broker_platform || 'unselected';
+  if ($('h-platform') && $('h-platform').querySelector('option[value="' + selectedPlatform + '"]')) $('h-platform').value = selectedPlatform;
+  if ($('h-link') && handoff?.platform_link) $('h-link').value = handoff.platform_link;
+  if ($('h-status') && handoff?.status) $('h-status').value = handoff.status;
+  $('edit-terms').onclick = editTerms;
+  $('save-handoff').onclick = saveHandoff;
+  $('record-event').onclick = addEvent;
+}
+
+function editTerms() {
+  if (!current) return;
+  const t = current.versions[0].terms;
+  let body = '<div class="card"><h3 style="margin-top:0">New offer version</h3><p class="small muted">Changing terms creates a new version and makes the previous investor approval no longer current.</p>';
+  body += '<div class="two"><div class="field"><label>Price</label><input id="e-price" value="' + esc(t.price) + '"></div><div class="field"><label>Earnest money</label><input id="e-earnest" value="' + esc(t.earnest_money || '') + '"></div></div>';
+  body += '<div class="three"><div class="field"><label>Due diligence fee</label><input id="e-ddfee" value="' + esc(t.due_diligence_fee || '') + '"></div><div class="field"><label>Due diligence period (days)</label><input id="e-ddperiod" type="number" min="0" step="1" value="' + esc(t.due_diligence_period_days ?? '') + '"></div><div class="field"><label>Due diligence end</label><input id="e-ddend" type="date" value="' + esc(t.due_diligence_end || '') + '"></div></div>';
+  body += '<div class="two"><div class="field"><label>Financing deadline</label><input id="e-financing" type="date" value="' + esc(t.financing_deadline || '') + '"></div><div class="field"><label>Closing date</label><input id="e-close" type="date" value="' + esc(t.closing_date || '') + '"></div></div>';
+  body += '<div class="field"><label>Closing time (optional)</label><input id="e-close-time" type="time" value="' + esc(t.closing_time || '') + '"><span class="muted small">Used for hour-based closing alerts when supplied.</span></div>';
+  body += '<div class="field"><label>Offer expires</label><input id="e-exp" type="datetime-local" value="' + (t.expires_at ? new Date(t.expires_at).toISOString().slice(0,16) : '') + '"></div>';
+  body += '<div class="field"><label>Financing contingency</label><textarea id="e-fin-contingency">' + esc(t.financing_contingency || '') + '</textarea></div>';
+  body += '<div class="field"><label>Included</label><textarea id="e-inc">' + esc(t.included || '') + '</textarea></div>';
+  body += '<div class="row"><button class="btn primary" id="save-terms">Create new version</button><button class="btn" id="cancel-edit">Cancel</button></div></div>';
+  $('d-body').innerHTML = body;
+  $('save-terms').onclick = saveTerms;
+  $('cancel-edit').onclick = renderDetail;
+}
+
+async function saveTerms() {
+  try {
+    if (!$('e-exp').value) throw new Error('Offer expiration is required.');
+    const terms = {
+      price: $('e-price').value,
+      earnest_money: $('e-earnest').value || null,
+      due_diligence_fee: $('e-ddfee').value || null,
+      due_diligence_period_days: $('e-ddperiod').value || null,
+      due_diligence_end: $('e-ddend').value || null,
+      financing_deadline: $('e-financing').value || null,
+      closing_date: $('e-close').value,
+      closing_time: $('e-close-time').value || null,
+      expires_at: new Date($('e-exp').value).toISOString(),
+      financing_contingency: $('e-fin-contingency').value || null,
+      included: $('e-inc').value || null,
+      currency: 'USD'
+    };
+    await api('PATCH', '/purchase-offers/' + current.offer.id + '/terms', {expected_version: current.offer.state_version, terms});
+    await openOffer(current.offer.id);
+  } catch (e) { alert(e.message); }
+}
+
+async function saveHandoff() {
+  try {
+    await api('POST', '/purchase-offers/' + current.offer.id + '/handoff', {
+      expected_version: current.offer.state_version,
+      platform: $('h-platform').value,
+      link: $('h-link').value || null,
+      status: $('h-status').value,
+      note: ''
+    });
+    await openOffer(current.offer.id);
+  } catch (e) { alert(e.message); }
+}
+
+async function addEvent() {
+  try {
+    await api('POST', '/purchase-offers/' + current.offer.id + '/negotiation', {
+      expected_version: current.offer.state_version,
+      event_type: $('n-type').value,
+      actor_type: $('n-actor').value,
+      actor_id: null,
+      amount: $('n-amount').value || null,
+      note: $('n-note').value || '',
+      terms: {}
+    });
+    await openOffer(current.offer.id);
+  } catch (e) { alert(e.message); }
+}
+
+$('d-send').onclick = async () => {
+  try {
+    $('d-send').disabled = true;
+    const result = await api('POST', '/purchase-offers/' + current.offer.id + '/send-approval');
+    alert('Approval link: ' + result.url + '\\n\\nDelivery status: ' + result.delivery.status);
+    await openOffer(current.offer.id);
+  } catch (e) {
+    alert(e.message);
+  } finally {
+    $('d-send').disabled = false;
+  }
+};
+
+init().catch((e) => { $('list').innerHTML = '<div class="banner">' + esc(e.message) + '</div>'; });
+</script></body></html>

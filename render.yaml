@@ -1,0 +1,79 @@
+# Render blueprint: New + -> Blueprint -> pick this repo.
+# Secrets marked sync: false are typed into Render's dashboard, never committed.
+services:
+  - type: web
+    name: staybot
+    runtime: python
+    plan: starter            # free plans sleep when idle, which delays WhatsApp replies
+    region: virginia         # US East - close to North Carolina customers and Meta's WhatsApp servers
+    buildCommand: pip install -r requirement.txt
+    startCommand: uvicorn src.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.13.5"
+      - key: APP_TIMEZONE
+        value: America/New_York
+      - key: BUSINESS_MARKET
+        value: North Carolina (Raleigh, Garner, Fuquay-Varina, Cary, Durham, Charlotte, Greensboro, Wilmington)
+      - key: BUSINESS_CURRENCY
+        value: USD
+      - key: AI_PROVIDER
+        value: gemini
+      - key: GEMINI_MODELS
+        value: gemini-3.5-flash,gemini-3.5-flash-lite
+      - key: GEMINI_API_KEY
+        sync: false
+      # Used by the maintenance photo classifier (/maintenance) regardless
+      # of AI_PROVIDER above.
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: MAINTENANCE_MODELS
+        value: openrouter/free,nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free,dots-studio/dots-3-note-preview:free
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: ADMIN_USERNAME
+        value: team
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: WHATSAPP_DRY_RUN
+        value: "true"
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_VERIFY_TOKEN
+        sync: false
+      - key: WHATSAPP_APP_SECRET
+        sync: false
+      - key: WHATSAPP_API_VERSION
+        value: v23.0
+      # Resident onboarding: address of this server, used in the private
+      # tenant/owner links sent on WhatsApp. Set to your onrender.com URL.
+      - key: PUBLIC_BASE_URL
+        sync: false
+      # Forgot password emails (src/services/password_reset.py). Link address falls back to
+      # PUBLIC_BASE_URL. Needs EMAIL_SMTP_* to actually send; run supabase_password_reset.sql once.
+      - key: PASSWORD_RESET_TTL_MINUTES
+        value: "60"
+      - key: PASSWORD_RESET_REVOKE_SESSIONS
+        value: "false"
+      # Hot customer alert (src/services/staff_alerts.py): who is told when a
+      # chat turns Hot / goes over 90. Comma-separated; leave blank to only log.
+      - key: STAFF_ALERT_EMAIL
+        sync: false
+      - key: STAFF_ALERT_WHATSAPP
+        sync: false
+      # Approved WhatsApp template for that alert (needed when the staff member
+      # hasn't messaged the business number in the last 24 hours).
+      - key: WHATSAPP_TEMPLATE_HOT_LEAD
+        sync: false
+      # Privacy policy page (/privacy) - Meta needs it. The client's real details.
+      - key: BUSINESS_NAME
+        sync: false
+      - key: PRIVACY_EMAIL
+        sync: false
+      - key: BUSINESS_POSTAL_ADDRESS
+        sync: false

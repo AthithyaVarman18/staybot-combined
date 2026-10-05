@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script src="/assets/tab-session.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Leads dashboard · Staybot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand: #1B3A5C;
+      --brand-dark: #12283F;
+      --brand-soft: #EAF0F6;
+      --accent: #B8873C;
+      --ink: #15191E;
+      --ink-2: #5A6069;
+      --line: #E2E4E8;
+      --line-soft: #EDEFF1;
+      --bg-soft: #F6F7F9;
+      --shadow-sm: 0 1px 2px rgba(15,23,33,0.05), 0 4px 14px rgba(15,23,33,0.05);
+      --radius: 10px;
+      --font-display: "Fraunces", Georgia, serif;
+      --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      font-family: var(--font-sans);
+      color: var(--ink);
+      background: #fff;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    /* ---------- header ---------- */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      height: 72px;
+      padding: 0 32px;
+      border-bottom: 1px solid var(--line-soft);
+      background: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--brand);
+      font-weight: 700;
+      font-size: 20px;
+      text-decoration: none;
+      letter-spacing: -0.2px;
+    }
+    .logo svg {
+      width: 26px;
+      height: 26px;
+      flex: none;
+    }
+    .back {
+      color: var(--ink-2);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid transparent;
+      transition: background .15s, border-color .15s;
+    }
+    .back:hover {
+      color: var(--ink);
+      background: var(--bg-soft);
+      border-color: var(--line-soft);
+    }
+
+    /* ---------- main ---------- */
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px;
+    }
+    h1 {
+      font-family: var(--font-display);
+      font-size: 25px;
+      margin: 0 0 4px;
+      letter-spacing: -0.2px;
+      font-weight: 600;
+    }
+    .sub {
+      color: var(--ink-2);
+      margin: 0 0 24px;
+    }
+    .sub code {
+      background: var(--bg-soft);
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    /* ---------- toolbar ---------- */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .filters button {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--ink-2);
+      transition: all .15s ease;
+      white-space: nowrap;
+    }
+    .filters button:hover {
+      border-color: var(--ink-2);
+      color: var(--ink);
+    }
+    .filters button.on {
+      background: var(--ink);
+      color: #fff;
+      border-color: var(--ink);
+    }
+    .filters button.on:hover {
+      background: #000;
+      border-color: #000;
+    }
+    .refresh {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--ink-2);
+      transition: all .15s ease;
+      white-space: nowrap;
+    }
+    .refresh:hover {
+      border-color: var(--ink);
+      color: var(--ink);
+      background: var(--bg-soft);
+    }
+
+    /* ---------- portfolio card ---------- */
+    .portfolio-card {
+      border: 1px solid var(--line-soft);
+      border-radius: var(--radius);
+      background: var(--bg-soft);
+      padding: 18px 20px;
+      margin-bottom: 20px;
+    }
+    .portfolio-card h2 {
+      font-size: 15px;
+      margin: 0 0 2px;
+      font-weight: 700;
+    }
+    .portfolio-card .sub {
+      margin: 0 0 14px;
+      font-size: 12.5px;
+    }
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px 20px;
+    }
+    .portfolio-field .k {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: var(--ink-2);
+      margin-bottom: 2px;
+    }
+    .portfolio-field .v {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .portfolio-empty {
+      font-size: 13px;
+      color: var(--ink-2);
+    }
+
+    /* ---------- table ---------- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    thead th {
+      text-align: left;
+      font-size: 12px;
+      color: var(--ink-2);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      font-weight: 700;
+    }
+    tbody tr {
+      cursor: pointer;
+      border-bottom: 1px solid var(--line-soft);
+      transition: background .1s;
+    }
+    tbody tr:hover {
+      background: var(--bg-soft);
+    }
+    tbody td {
+      padding: 14px 12px;
+      vertical-align: top;
+    }
+
+    /* ---------- chips & badges ---------- */
+    .role-chip {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--bg-soft);
+      color: var(--ink);
+      white-space: nowrap;
+    }
+    .score {
+      font-weight: 800;
+      font-size: 15px;
+    }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .status.cold { background: #EEF2F7; color: #4B6584; }
+    .status.warm { background: #FBF1E1; color: #92600A; }
+    .status.hot { background: #FBEAE3; color: #B0401E; }
+    .status.very_hot { background: #12283F; color: #fff; }
+
+    .listing-title {
+      font-weight: 600;
+    }
+    .listing-sub {
+      color: var(--ink-2);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+    .summary {
+      color: var(--ink-2);
+      max-width: 320px;
+    }
+    .updated {
+      color: var(--ink-2);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    /* ---------- states ---------- */
+    .empty-state, .error-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--ink-2);
+    }
+    .error-state code {
+      background: var(--bg-soft);
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+
+    /* ---------- detail drawer ---------- */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.35);
+      display: none;
+      z-index: 30;
+      backdrop-filter: blur(2px);
+    }
+    .overlay.open { display: block; }
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      height: 100%;
+      width: min(480px, 92vw);
+      background: #fff;
+      box-shadow: -8px 0 24px rgba(0,0,0,.15);
+      z-index: 31;
+      transform: translateX(100%);
+      transition: transform .25s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+    }
+    .drawer.open { transform: translateX(0); }
+    .drawer-head {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--line-soft);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      background: #fff;
+    }
+    .drawer-head h2 {
+      margin: 0 0 4px;
+      font-size: 17px;
+      font-weight: 700;
+    }
+    .drawer-close {
+      border: 0;
+      background: var(--bg-soft);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      font-size: 16px;
+      cursor: pointer;
+      flex: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s;
+      color: var(--ink-2);
+    }
+    .drawer-close:hover {
+      background: var(--line-soft);
+      color: var(--ink);
+    }
+    .drawer-body {
+      padding: 20px 24px;
+      overflow-y: auto;
+      flex: 1;
+      background: #fff;
+    }
+    .drawer .msg { margin-bottom: 14px; }
+    .drawer .msg .who {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--ink-2);
+      margin-bottom: 3px;
+      letter-spacing: .04em;
+    }
+    .drawer .msg .bubble {
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: var(--bg-soft);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .drawer .msg.user .bubble {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    /* ---------- responsive ---------- */
+    @media (max-width: 700px) {
+      header { padding: 0 16px; height: 64px; }
+      main { padding: 20px 16px; }
+      .summary { max-width: 180px; }
+      .filters button { font-size: 12px; padding: 5px 10px; }
+    }
+  </style>
+</head>
+<body>
+<!-- Log out - every user (shared helper in /assets/tab-session.js). -->
+<style>
+  .sb-logout { position: fixed; top: 18px; right: 20px; z-index: 50; display: inline-flex; align-items: center; gap: 7px;
+    border: 1px solid #DDDDDD; background: #fff; color: #222; border-radius: 999px; padding: 8px 14px 8px 12px;
+    font: 600 13.5px/1 inherit; font-family: inherit; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+  .sb-logout:hover { border-color: #222; }
+  .sb-logout:focus-visible { outline: 2px solid #1B3A5C; outline-offset: 2px; }
+  .sb-logout:disabled { opacity: .6; cursor: default; }
+  @media (max-width: 560px) { .sb-logout { top: 12px; right: 12px; padding: 7px 11px; } }
+</style>
+<button class="sb-logout" id="sb-logout" type="button">
+  <svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><path d="M8 4H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3M13 14l4-4-4-4M17 10H8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  Log out
+</button>
+<script>
+  document.getElementById("sb-logout").addEventListener("click", async function () {
+    this.disabled = true;
+    let me = null;
+    try { const r = await fetch("/auth/me"); if (r.ok) me = await r.json(); } catch (e) { /* ignore */ }
+    if (me) {
+      if (window.staybotLogout) await window.staybotLogout(false);
+      else { try { await fetch("/auth/logout", { method: "POST" }); } catch (e) { /* leave anyway */ } }
+      if (me.role === "admin") location.href = "/admin/login";
+      else location.href = "/login";
+      return;
+    }
+    // Shared team password: replace the browser's saved password so it asks again.
+    try { await fetch(location.pathname, { headers: { Authorization: "Basic " + btoa("logged-out:" + Date.now()) }, cache: "no-store" }); } catch (e) { /* ignore */ }
+    location.href = "/login";
+  });
+</script>
+
+
+<header>
+  <a class="logo" href="/ui" aria-label="Staybot home">
+    <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+      <path d="M16 2.5c.9 0 1.7.5 2.2 1.3l11 19.1c1.6 2.8-.4 6.3-3.6 6.3-1.4 0-2.7-.7-3.5-1.8L16 20.2l-6.1 7.2c-.8 1.1-2.1 1.8-3.5 1.8-3.2 0-5.2-3.5-3.6-6.3l11-19.1c.5-.8 1.3-1.3 2.2-1.3zm0 4.4L6.1 24.2c-.4.7.1 1.6.9 1.6.4 0 .7-.2.9-.4L16 15.8l8.1 9.6c.2.3.5.4.9.4.8 0 1.3-.9.9-1.6L16 6.9z"/>
+    </svg>
+    staybot
+  </a>
+  <a class="back" href="/ui">&larr; Back to chat tester</a>
+</header>
+
+<main>
+  <h1 id="dash-title">Leads dashboard</h1>
+  <p class="sub" id="dash-sub">Every saved conversation, scored automatically by <code>/analyze</code> and stored in Supabase.</p>
+
+  <div class="toolbar">
+    <div class="filters" id="filters">
+      <button class="on" data-filter="all">All</button>
+      <button data-filter="very_hot">Very hot</button>
+      <button data-filter="hot">Hot</button>
+      <button data-filter="warm">Warm</button>
+      <button data-filter="cold">Cold</button>
+    </div>
+    <button class="refresh" id="refresh">Refresh</button>
+  </div>
+
+  <div class="portfolio-card" id="portfolio-card" hidden>
+    <h2 id="portfolio-title">Your portfolio</h2>
+    <p class="sub" id="portfolio-sub">Details picked up automatically as you chat with the bot.</p>
+    <div id="portfolio-body"></div>
+  </div>
+
+  <div id="content">Loading…</div>
+</main>
+
+<div class="overlay" id="overlay"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div>
+      <h2 id="drawer-title">Lead</h2>
+      <div class="listing-sub" id="drawer-sub"></div>
+    </div>
+    <button class="drawer-close" id="drawer-close" aria-label="Close drawer">✕</button>
+  </div>
+  <div class="drawer-body" id="drawer-body"></div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, cls, text) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  };
+
+  let leads = [];
+  let activeFilter = "all";
+
+  // The logged-in account's role decides which leads this dashboard shows,
+  // and its session_id scopes that further to this account's own
+  // conversations only - never another account's, even one with the same
+  // role (see src/services/accounts.py: each account owns a fixed
+  // session_id, so this is stable across logins/devices for that account).
+  let accountRole = null;
+  let accountSessionId = null;
+
+  function roleFilterFor(role) {
+    if (role === "tenant") return "tenant";
+    if (role === "new_investor" || role === "existing_investor") return "owner";
+    return null; // unknown/no account - show everything rather than nothing
+  }
+
+  async function loadAccount() {
+    try {
+      const res = await fetch("/auth/me");
+      if (res.ok) {
+        const account = await res.json();
+        accountRole = account.role;
+        accountSessionId = account.session_id;
+      }
+    } catch (err) {
+      // Non-fatal: fall back to showing everything unfiltered.
+    }
+    applyHeading();
+  }
+
+  function applyHeading() {
+    const scope = roleFilterFor(accountRole);
+    if (scope === "tenant") {
+      $("dash-title").textContent = "Your leads";
+      $("dash-sub").textContent = "Conversations you've had with us, scored automatically.";
+    } else if (scope === "owner") {
+      $("dash-title").textContent = "Your owner leads";
+      $("dash-sub").textContent = "Conversations about your property, scored automatically.";
+    }
+  }
+
+  function prettyValue(v) {
+    if (Array.isArray(v)) return v.length ? v.map(pretty).join(", ") : "—";
+    if (typeof v === "boolean") return v ? "Yes" : "No";
+    return pretty(v);
+  }
+
+  async function loadPortfolio() {
+    if (!accountRole) { $("portfolio-card").hidden = true; return; }
+
+    $("portfolio-title").textContent = accountRole === "tenant" ? "Your portfolio" : "Your property portfolio";
+    $("portfolio-sub").textContent = accountRole === "tenant"
+      ? "What you're looking for, picked up automatically as you chat with the bot."
+      : "Your property details, picked up automatically as you chat with the bot.";
+
+    try {
+      const res = await fetch("/auth/portfolio");
+      if (!res.ok) { $("portfolio-card").hidden = true; return; }
+      const data = await res.json();
+      const details = (data && data.details) || {};
+      const keys = Object.keys(details);
+
+      $("portfolio-card").hidden = false;
+      $("portfolio-body").innerHTML = "";
+
+      if (!keys.length) {
+        $("portfolio-body").appendChild(
+          el("div", "portfolio-empty", "Nothing yet - it fills in automatically as you chat with the bot.")
+        );
+        return;
+      }
+
+      const grid = el("div", "portfolio-grid");
+      const HIDDEN_KEYS = new Set(["proof_of_income_document_id", "proof_of_income_content_type"]);
+      for (const k of keys) {
+        if (HIDDEN_KEYS.has(k)) continue;
+        const field = el("div", "portfolio-field");
+        if (k === "proof_of_income" && details.proof_of_income_document_id) {
+          const url = `/auth/screening/document/${details.proof_of_income_document_id}/file`;
+          const isImage = (details.proof_of_income_content_type || "").startsWith("image/");
+          field.append(el("div", "k", pretty(k)));
+          if (isImage) {
+            const img = document.createElement("img");
+            img.src = url;
+            img.alt = "Proof of income";
+            img.style.cssText = "max-width:180px;max-height:140px;border-radius:8px;border:1px solid var(--line);display:block;object-fit:cover";
+            field.appendChild(img);
+          } else {
+            const link = document.createElement("a");
+            link.href = url; link.target = "_blank"; link.rel = "noopener";
+            link.textContent = "View document";
+            link.style.cssText = "font-size:14px;font-weight:600;color:var(--brand)";
+            field.appendChild(link);
+          }
+        } else {
+          field.append(el("div", "k", pretty(k)), el("div", "v", prettyValue(details[k])));
+        }
+        grid.appendChild(field);
+      }
+      $("portfolio-body").appendChild(grid);
+    } catch (err) {
+      $("portfolio-card").hidden = true;
+    }
+  }
+
+  function timeAgo(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    const s = Math.round((Date.now() - d.getTime()) / 1000);
+    if (s < 60) return "just now";
+    if (s < 3600) return Math.floor(s / 60) + "m ago";
+    if (s < 86400) return Math.floor(s / 3600) + "h ago";
+    return Math.floor(s / 86400) + "d ago";
+  }
+
+  function pretty(s) {
+    return s ? String(s).replace(/_/g, " ") : "—";
+  }
+
+  async function loadLeads() {
+    $("content").innerHTML = "Loading…";
+    try {
+      const res = await fetch("/leads");
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.detail || `HTTP ${res.status}`);
+      }
+      const allLeads = await res.json();
+      const scope = roleFilterFor(accountRole);
+      leads = scope
+        ? allLeads.filter(l => l.role === scope && l.session_id === accountSessionId)
+        : allLeads;
+      renderTable();
+    } catch (err) {
+      $("content").innerHTML = "";
+      const e = el("div", "error-state");
+      e.innerHTML = `
+        <div style="font-size:26px;margin-bottom:8px">🗄️</div>
+        <div><b>Couldn't load leads.</b></div>
+        <p>${err.message.replace(/</g, "&lt;")}</p>
+        <p>Set <code>SUPABASE_URL</code> and <code>SUPABASE_SERVICE_KEY</code> in <code>.env</code>,
+        run <code>supabase_schema.sql</code> in the Supabase SQL editor, then restart the server.</p>
+      `;
+      $("content").appendChild(e);
+    }
+  }
+
+  function renderTable() {
+    const rows = activeFilter === "all"
+      ? leads
+      : leads.filter(l => l.lead_status === activeFilter);
+
+    $("content").innerHTML = "";
+
+    if (!rows.length) {
+      const e = el("div", "empty-state");
+      e.innerHTML = `
+        <div style="font-size:26px;margin-bottom:8px">📭</div>
+        <div><b>No leads yet.</b></div>
+        <p>Chat with a listing in the tester and it'll show up here.</p>
+      `;
+      $("content").appendChild(e);
+      return;
+    }
+
+    const table = el("table");
+    const thead = el("thead");
+    thead.innerHTML = `
+      <tr>
+        <th>Score</th>
+        <th>Status</th>
+        <th>Role</th>
+        <th>Intent</th>
+        <th>Listing</th>
+        <th>Summary</th>
+        <th>Updated</th>
+      </tr>
+    `;
+    table.appendChild(thead);
+    const tbody = el("tbody");
+
+    for (const l of rows) {
+      const tr = el("tr");
+      tr.addEventListener("click", () => openDrawer(l));
+
+      const tdScore = el("td");
+      tdScore.innerHTML = `<span class="score">${l.intent_score ?? 0}</span>`;
+      tr.appendChild(tdScore);
+
+      const tdStatus = el("td");
+      tdStatus.innerHTML = `<span class="status ${l.lead_status || 'cold'}">${pretty(l.lead_status)}</span>`;
+      tr.appendChild(tdStatus);
+
+      const tdRole = el("td");
+      tdRole.innerHTML = l.role
+        ? `<span class="role-chip">${pretty(l.role)}</span>`
+        : "—";
+      tr.appendChild(tdRole);
+
+      tr.appendChild(el("td", null, pretty(l.intent)));
+
+      const tdListing = el("td");
+      tdListing.innerHTML = `<div class="listing-title">${l.listing_title || "General enquiry"}</div>`;
+      tr.appendChild(tdListing);
+
+      const tdSummary = el("td", "summary", l.summary || "—");
+      tr.appendChild(tdSummary);
+
+      const tdUpdated = el("td", "updated", timeAgo(l.updated_at));
+      tr.appendChild(tdUpdated);
+
+      tbody.appendChild(tr);
+    }
+
+    table.appendChild(tbody);
+    $("content").appendChild(table);
+  }
+
+  async function openDrawer(lead) {
+    $("drawer-title").textContent = lead.listing_title || "General enquiry";
+    $("drawer-sub").textContent = `${pretty(lead.role)} · score ${lead.intent_score ?? 0} · ${pretty(lead.lead_status)}`;
+    $("drawer-body").innerHTML = "Loading…";
+    $("overlay").classList.add("open");
+    $("drawer").classList.add("open");
+
+    try {
+      const res = await fetch(`/leads/${lead.id}`);
+      const data = await res.json();
+      $("drawer-body").innerHTML = "";
+      for (const m of (data.messages || [])) {
+        const wrap = el("div", "msg " + m.role);
+        wrap.append(
+          el("div", "who", m.role),
+          el("div", "bubble", m.content)
+        );
+        $("drawer-body").appendChild(wrap);
+      }
+      if (!data.messages || !data.messages.length) {
+        $("drawer-body").innerHTML = `<p class="sub">No messages saved for this lead.</p>`;
+      }
+    } catch (err) {
+      $("drawer-body").innerHTML = `<p class="sub">Couldn't load messages: ${err.message}</p>`;
+    }
+  }
+
+  function closeDrawer() {
+    $("overlay").classList.remove("open");
+    $("drawer").classList.remove("open");
+  }
+
+  $("overlay").addEventListener("click", closeDrawer);
+  $("drawer-close").addEventListener("click", closeDrawer);
+  $("refresh").addEventListener("click", loadLeads);
+
+  document.querySelectorAll("#filters button").forEach(b => {
+    b.addEventListener("click", () => {
+      document.querySelectorAll("#filters button").forEach(x => x.classList.toggle("on", x === b));
+      activeFilter = b.dataset.filter;
+      renderTable();
+    });
+  });
+
+  loadAccount().then(() => { loadLeads(); loadPortfolio(); });
+</script>
+</body>
+</html>

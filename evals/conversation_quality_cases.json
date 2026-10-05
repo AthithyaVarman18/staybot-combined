@@ -1,0 +1,112 @@
+[
+  {
+    "id": "viewing-no-implied-availability",
+    "category": "conversation_quality",
+    "property": "omr-3bhk",
+    "turns": [
+      {
+        "user": "Can I visit this Saturday at 10 AM?",
+        "expect": {
+          "reply_not_contains": [
+            "works",
+            "is available",
+            "is fine",
+            "confirmed your",
+            "have booked"
+          ],
+          "reply_contains_any": [
+            "request",
+            "check availability"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "selected-rent-no-search-restart",
+    "category": "conversation_quality",
+    "property": "omr-3bhk",
+    "turns": [
+      {
+        "user": "What is the rent?",
+        "expect": {
+          "reply_contains_any": [
+            "35,000",
+            "35000"
+          ],
+          "reply_not_contains": [
+            "?"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "selected-parking-no-unrelated-question",
+    "category": "conversation_quality",
+    "property": "omr-3bhk",
+    "turns": [
+      {
+        "user": "Is parking available?",
+        "expect": {
+          "reply_contains_any": [
+            "yes",
+            "parking is available",
+            "has parking"
+          ],
+          "reply_not_contains": [
+            "?"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "search-does-not-repeat-known-preferences",
+    "category": "conversation_quality",
+    "turns": [
+      {
+        "user": "I want to rent a 3BHK apartment in OMR. My maximum budget is 40000 rupees per month.",
+        "expect": {
+          "reply_not_contains": [
+            "what is your budget",
+            "what budget",
+            "which area",
+            "which location",
+            "how many bedrooms",
+            "rent or buy"
+          ],
+          "requirements": {
+            "bedrooms": 3,
+            "budget": 40000
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "viewing-does-not-repeat-contact",
+    "category": "conversation_quality",
+    "property": "omr-3bhk",
+    "turns": [
+      {
+        "user": "Can I visit this Saturday at 10 AM? My name is Test Customer and my phone is 9876543210."
+      },
+      {
+        "user": "Yes, please request that time.",
+        "expect": {
+          "reply_not_contains": [
+            "?",
+            "works",
+            "is available",
+            "is fine"
+          ],
+          "viewing": {
+            "time": "10:00",
+            "phone": "+919876543210"
+          }
+        }
+      }
+    ]
+  }
+]
