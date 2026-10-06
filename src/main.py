@@ -116,13 +116,24 @@ def admin_login_page(request: Request):
     )
 
 
+@app.get("/static/assets/requirements-hero-right.png", include_in_schema=False)
+def requirements_hero_image():
+    return FileResponse(
+        STATIC_DIR / "assets" / "requirements-hero-right.png",
+        media_type="image/png",
+        headers={"Cache-Control": "public, max-age=3600"},
+    )
+
+
 # Public script for the login/register 3D property viewer: one file with
 # Three.js (r149, MIT) bundled in, plus the viewer and its styles.
 @app.get("/assets/property-scene.js", include_in_schema=False)
 def property_scene_script():
-    return FileResponse(STATIC_DIR / "property-scene.js", media_type="text/javascript",
-                        headers={"Cache-Control": "public, max-age=3600"})
-
+    return FileResponse(
+        STATIC_DIR / "property-scene.js",
+        media_type="text/javascript",
+        headers={"Cache-Control": "public, max-age=3600"}
+    )
 
 # Per-tab login script (keeps each tab on the account it logged in as - see
 # the file's header comment). Loaded by every account page, including the
